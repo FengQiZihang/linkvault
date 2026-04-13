@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LinkVault 交互原型</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #1a1a1f;
+    --surface2: #242429;
+    --border: #2e2e36;
+    --accent: #7c6fcd;
+    --accent2: #a78bfa;
+    --text: #e8e8f0;
+    --text2: #8888a0;
+    --text3: #55556a;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --radius: 12px;
+    --phone-w: 390px;
+    --phone-h: 780px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #080810;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  /* ===== TOP NAV ===== */
+  .top-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+    max-width: 900px;
+  }
+
+  .nav-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--text); }
+  .nav-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ===== PHONE FRAME ===== */
+  .phone-wrapper {
+    position: relative;
+    width: var(--phone-w);
+  }
+
+  .phone-frame {
+    width: var(--phone-w);
+    height: var(--phone-h);
+    background: var(--surface);
+    border-radius: 44px;
+    border: 2px solid var(--border);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.04) inset;
+  }
+
+  /* status bar */
+  .status-bar {
+    height: 44px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+  .status-time { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons span { font-size: 11px; color: var(--text2); }
+
+  /* screen container */
+  .screen { display: none; flex-direction: column; height: calc(var(--phone-h) - 44px); }
+  .screen.active { display: flex; }
+
+  /* scrollable content */
+  .scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; }
+  .scroll-area::-webkit-scrollbar { width: 0; }
+
+  /* bottom nav bar */
+  .bottom-nav {
+    height: 60px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-shrink: 0;
+  }
+
+  .bnav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    color: var(--text3);
+    transition: color .15s;
+    padding: 4px 16px;
+  }
+  .bnav-item.active { color: var(--accent2); }
+  .bnav-item span { font-size: 9px; }
+  .bnav-icon { font-size: 20px; }
+
+  /* ===== COMMON COMPONENTS ===== */
+  .page-header {
+    background: var(--bg);
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .page-title { font-size: 18px; font-weight: 700; }
+  .page-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .btn {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all .15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; padding: 12px 20px; width: 100%; }
+  .btn-primary:active { background: #6a5fc0; }
+  .btn-ghost { background: var(--surface2); color: var(--text2); padding: 10px 16px; }
+  .btn-danger { background: rgba(248,113,113,.15); color: var(--red); padding: 10px 16px; border: 1px solid rgba(248,113,113,.3); }
+
+  .input-field {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 14px;
+    width: 100%;
+    font-family: 'Noto Sans SC', sans-serif;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .input-field::placeholder { color: var(--text3); }
+  textarea.input-field { resize: none; line-height: 1.6; }
+
+  .label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
+
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(124,111,205,.2);
+    border: 1px solid rgba(124,111,205,.4);
+    color: var(--accent2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .tag-chip:hover, .tag-chip.selected { background: rgba(124,111,205,.4); border-color: var(--accent2); }
+  .tag-chip.pinned { background: rgba(251,191,36,.15); border-color: rgba(251,191,36,.4); color: var(--yellow); }
+  .tag-chip.pinned:hover { background: rgba(251,191,36,.3); }
+
+  .divider { height: 1px; background: var(--border); margin: 0 20px; }
+
+  .link-card {
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: background .12s;
+    border-bottom: 1px solid var(--border);
+  }
+  .link-card:active { background: var(--surface2); }
+  .link-card-title { font-size: 14px; font-weight: 500; line-height: 1.5; margin-bottom: 4px; }
+  .link-card-note { font-size: 12px; color: var(--accent2); line-height: 1.5; margin-bottom: 6px; opacity: .85; }
+  .link-card-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .link-card-source { font-size: 11px; color: var(--text3); }
+  .link-card-time { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+  /* ===== SCREEN: LOGIN ===== */
+  #s-login .scroll-area { padding: 40px 28px; display: flex; flex-direction: column; justify-content: center; min-height: 100%; }
+  .login-logo { font-family: 'Space Mono', monospace; font-size: 28px; font-weight: 700; letter-spacing: -1px; margin-bottom: 6px; }
+  .login-logo span { color: var(--accent2); }
+  .login-tagline { font-size: 13px; color: var(--text2); margin-bottom: 48px; line-height: 1.6; }
+  .login-form { display: flex; flex-direction: column; gap: 14px; }
+  .phone-row { display: flex; gap: 8px; }
+  .phone-prefix { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; color: var(--text2); font-size: 14px; white-space: nowrap; }
+  .send-code-btn { background: var(--surface2); border: 1px solid var(--accent); color: var(--accent2); border-radius: 8px; padding: 12px 14px; font-size: 12px; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans SC', sans-serif; }
+  .login-tips { font-size: 11px; color: var(--text3); text-align: center; line-height: 1.6; }
+
+  /* ===== SCREEN: SETUP ===== */
+  #s-setup .scroll-area { padding: 32px 28px; }
+  .avatar-picker { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 32px; }
+  .avatar-circle { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 32px; border: 2px dashed rgba(255,255,255,.2); cursor: pointer; }
+  .avatar-hint { font-size: 12px; color: var(--text3); }
+  .setup-step-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .setup-step-sub { font-size: 13px; color: var(--text2); margin-bottom: 32px; line-height: 1.6; }
+
+  /* ===== SCREEN: HOME ===== */
+  #s-home .scroll-area { padding-bottom: 16px; }
+  .home-header {
+    background: var(--bg);
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .home-greeting { font-size: 13px; color: var(--text2); }
+  .home-title { font-size: 22px; font-weight: 700; margin: 2px 0 14px; letter-spacing: -.3px; }
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    gap: 8px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .search-bar:hover { border-color: var(--accent); }
+  .search-placeholder { font-size: 13px; color: var(--text3); flex: 1; }
+  .search-icon { font-size: 16px; color: var(--text3); }
+
+  .quick-cards { display: flex; gap: 10px; padding: 16px 20px; overflow-x: auto; }
+  .quick-cards::-webkit-scrollbar { display: none; }
+  .quick-card {
+    flex-shrink: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    min-width: 120px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .quick-card:hover { border-color: var(--accent); }
+  .quick-card-icon { font-size: 22px; margin-bottom: 8px; }
+  .quick-card-label { font-size: 12px; color: var(--text2); margin-bottom: 2px; }
+  .quick-card-count { font-size: 18px; font-weight: 700; color: var(--text); }
+  .quick-card.special { border-color: rgba(124,111,205,.4); background: rgba(124,111,205,.1); }
+  .quick-card.special .quick-card-count { color: var(--accent2); }
+
+  .section-header { padding: 14px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
+  .section-title { font-size: 13px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; }
+  .section-action { font-size: 12px; color: var(--accent2); cursor: pointer; }
+
+  .tags-row { display: flex; gap: 8px; padding: 0 20px 16px; overflow-x: auto; flex-wrap: nowrap; }
+  .tags-row::-webkit-scrollbar { display: none; }
+
+  /* ===== SCREEN: SHARE IMPORT ===== */
+  #s-share .scroll-area { padding: 0 0 20px; }
+  .share-header { padding: 16px 20px 0; }
+  .saved-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(74,222,128,.15);
+    border: 1px solid rgba(74,222,128,.3);
+    color: var(--green);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+  .link-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin: 0 20px 20px;
+  }
+  .link-preview-platform { font-size: 11px; color: var(--text3); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+  .link-preview-title { font-size: 14px; font-weight: 500; line-height: 1.5; margin-bottom: 6px; }
+  .link-preview-url { font-size: 11px; color: var(--text3); word-break: break-all; line-height: 1.5; }
+  .share-section { padding: 0 20px 16px; }
+  .char-count { font-size: 11px; color: var(--text3); text-align: right; margin-top: 4px; }
+
+  .tag-select-area { display: flex; gap: 8px; flex-wrap: wrap; }
+  .add-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text3);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .add-tag-chip:hover { border-color: var(--accent); color: var(--accent2); }
+  .share-actions { padding: 0 20px; display: flex; gap: 10px; }
+
+  /* ===== SCREEN: TAG MANAGE ===== */
+  #s-tags .scroll-area { padding-bottom: 16px; }
+  .tag-manage-section { padding: 14px 20px 0; }
+  .tag-section-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .tag-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .tag-list-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    cursor: pointer;
+  }
+  .tag-list-item:last-child { border-bottom: none; }
+  .tag-pin-icon { color: var(--text3); font-size: 14px; width: 20px; text-align: center; }
+  .tag-list-name { flex: 1; font-size: 14px; }
+  .tag-list-count { font-size: 12px; color: var(--text3); }
+  .tag-list-arrow { color: var(--text3); font-size: 12px; }
+
+  /* tag action modal */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    display: none;
+    align-items: flex-end;
+    z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 16px 20px 32px;
+    width: 100%;
+    border-top: 1px solid var(--border);
+  }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .modal-sub { font-size: 12px; color: var(--text2); margin-bottom: 20px; }
+  .modal-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: color .12s;
+  }
+  .modal-action:last-child { border-bottom: none; }
+  .modal-action-icon { font-size: 18px; width: 28px; text-align: center; }
+  .modal-action-text { font-size: 14px; }
+  .modal-action.danger .modal-action-text { color: var(--red); }
+  .modal-action.danger .modal-action-icon { color: var(--red); }
+
+  /* confirm modal */
+  .confirm-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .confirm-modal-overlay.open { display: flex; }
+  .confirm-modal {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px 20px 16px;
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid var(--border);
+  }
+  .confirm-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .confirm-body { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-btns .btn { flex: 1; text-align: center; border: none; }
+
+  /* ===== SCREEN: SEARCH ===== */
+  #s-search .scroll-area { padding-bottom: 16px; }
+  .search-header { padding: 12px 20px; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .search-input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .search-input-wrap { flex: 1; position: relative; }
+  .search-input-wrap .search-icon-inner { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text3); }
+  .search-input-wrap input { padding-left: 36px; }
+  .search-cancel { font-size: 13px; color: var(--accent2); cursor: pointer; white-space: nowrap; }
+  .active-tags-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .active-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(124,111,205,.25); border: 1px solid rgba(124,111,205,.5); color: var(--accent2); padding: 3px 8px; border-radius: 20px; font-size: 11px; }
+  .active-tag-remove { cursor: pointer; opacity: .7; }
+
+  .search-result-header { padding: 10px 20px; font-size: 12px; color: var(--text3); }
+  .highlight { color: var(--accent2); font-weight: 500; }
+
+  /* ===== SCREEN: DETAIL ===== */
+  #s-detail .scroll-area { padding: 0 0 20px; }
+  .detail-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .back-btn { font-size: 20px; color: var(--text2); cursor: pointer; }
+  .detail-header-title { font-size: 15px; font-weight: 500; flex: 1; }
+  .detail-more { font-size: 20px; color: var(--text2); cursor: pointer; }
+
+  .detail-body { padding: 20px; }
+  .detail-platform-row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+  .platform-badge { background: var(--surface2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 6px; font-size: 11px; color: var(--text2); }
+  .detail-time { font-size: 11px; color: var(--text3); margin-left: auto; }
+  .detail-title { font-size: 18px; font-weight: 700; line-height: 1.5; margin-bottom: 16px; }
+  .detail-section { margin-bottom: 20px; }
+  .detail-section-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .detail-note { background: var(--surface2); border-left: 3px solid var(--accent); padding: 12px 14px; border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.7; color: var(--text); }
+  .detail-note.empty { color: var(--text3); font-style: italic; }
+  .detail-url { font-size: 12px; color: var(--accent2); word-break: break-all; line-height: 1.6; }
+  .detail-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .detail-actions { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+  .open-link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .open-link-btn:active { background: #6a5fc0; }
+  .detail-secondary-actions { display: flex; gap: 10px; }
+  .detail-secondary-actions .btn { flex: 1; text-align: center; }
+
+  /* ===== SCREEN: TAG RESULTS ===== */
+  /* reuses link-card */
+  .tag-result-header { padding: 16px 20px 10px; border-bottom: 1px solid var(--border); }
+  .tag-result-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .tag-emoji { font-size: 18px; }
+  .tag-result-count { font-size: 12px; color: var(--text2); }
+
+  /* ===== SCREEN: PROFILE ===== */
+  .profile-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 10px;
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .profile-row:active { background: var(--surface); }
+  .profile-row-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+  .profile-row-label { flex: 1; font-size: 14px; }
+  .profile-row-value { font-size: 13px; color: var(--text2); }
+  .profile-row-arrow { color: var(--text3); font-size: 14px; margin-left: 6px; }
+  .profile-divider { height: 1px; background: var(--border); margin: 0 16px; }
+
+  /* ===== ANIM ===== */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .screen.active { animation: fadeIn .2s ease; }
+</style>
+</head>
+<body>
+
+<div style="text-align:center;margin-bottom:12px;">
+  <div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;letter-spacing:-1px;">Link<span style="color:#a78bfa">Vault</span></div>
+  <div style="font-size:11px;color:#55556a;margin-top:3px;">交互原型 · 点击导航按钮或页面内元素跳转</div>
+</div>
+
+<div class="top-nav">
+  <button class="nav-btn active" onclick="goto('login')">登录注册</button>
+  <button class="nav-btn" onclick="goto('setup')">信息完善</button>
+  <button class="nav-btn" onclick="goto('home')">首页</button>
+  <button class="nav-btn" onclick="goto('share')">分享导入</button>
+  <button class="nav-btn" onclick="goto('tags')">标签管理</button>
+  <button class="nav-btn" onclick="goto('tagresult')">标签筛选</button>
+  <button class="nav-btn" onclick="goto('search')">搜索</button>
+  <button class="nav-btn" onclick="goto('detail')">链接详情</button>
+  <button class="nav-btn" onclick="goto('profile')">我的</button>
+</div>
+
+<div class="phone-wrapper">
+<div class="phone-frame">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <span>●●●</span>
+      <span>WiFi</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- ==================== LOGIN ==================== -->
+  <div class="screen active" id="s-login">
+    <div class="scroll-area">
+      <div class="login-logo">Link<span>Vault</span></div>
+      <div class="login-tagline">存得住，找得回，<br>看得懂自己为什么存。</div>
+      <div class="login-form">
+        <div>
+          <span class="label">手机号</span>
+          <div class="phone-row">
+            <div class="phone-prefix">+86</div>
+            <input type="text" class="input-field" placeholder="请输入手机号" style="flex:1;">
+          </div>
+        </div>
+        <div>
+          <span class="label">验证码</span>
+          <div class="phone-row">
+            <input type="text" class="input-field" placeholder="6位验证码" style="flex:1;">
+            <button class="send-code-btn">发送验证码</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="goto('setup')" style="margin-top:8px;">登录 / 注册</button>
+        <div class="login-tips">未注册手机号将自动注册新账号<br>登录即代表同意用户协议与隐私政策</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SETUP ==================== -->
+  <div class="screen" id="s-setup">
+    <div class="scroll-area" style="padding:32px 28px;">
+      <div class="setup-step-title">完善个人信息</div>
+      <div class="setup-step-sub">设置昵称和头像，让你的收藏库更有辨识度。</div>
+      <div class="avatar-picker">
+        <div class="avatar-circle">🦊</div>
+        <div class="avatar-hint">点击更换头像</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <span class="label">昵称</span>
+          <input type="text" class="input-field" placeholder="给自己起个名字" value="风启自航">
+        </div>
+        <button class="btn btn-primary" onclick="goto('home')" style="margin-top:8px;">进入 LinkVault →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== HOME ==================== -->
+  <div class="screen" id="s-home">
+    <div class="scroll-area">
+      <div class="home-header">
+        <div class="home-greeting">下午好，风启自航 👋</div>
+        <div class="home-title">我的链接库</div>
+        <div class="search-bar" onclick="goto('search')">
+          <span class="search-icon">🔍</span>
+          <span class="search-placeholder">搜索标题或备注…</span>
+        </div>
+      </div>
+
+      <!-- quick stats -->
+      <div class="quick-cards">
+        <div class="quick-card special">
+          <div class="quick-card-icon">🔖</div>
+          <div class="quick-card-label">全部收藏</div>
+          <div class="quick-card-count">47</div>
+        </div>
+        <div class="quick-card" onclick="goto('tagresult')">
+          <div class="quick-card-icon">🏷️</div>
+          <div class="quick-card-label">标签数</div>
+          <div class="quick-card-count">12</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-card-icon">📭</div>
+          <div class="quick-card-label">未打标签</div>
+          <div class="quick-card-count">6</div>
+        </div>
+      </div>
+
+      <!-- tags row -->
+      <div class="section-header">
+        <div class="section-title">常用标签</div>
+        <div class="section-action" onclick="goto('tags')">管理 →</div>
+      </div>
+      <div class="tags-row">
+        <div class="tag-chip pinned" onclick="goto('tagresult')">📌 技术</div>
+        <div class="tag-chip pinned" onclick="goto('tagresult')">📌 AI</div>
+        <div class="tag-chip" onclick="goto('tagresult')">读书</div>
+        <div class="tag-chip" onclick="goto('tagresult')">工具</div>
+        <div class="tag-chip" onclick="goto('tagresult')">视频</div>
+        <div class="tag-chip" onclick="goto('tagresult')">待看</div>
+      </div>
+
+      <!-- recent links -->
+      <div class="section-header">
+        <div class="section-title">最近保存</div>
+        <div class="section-action">全部</div>
+      </div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title">Claude Code 配额管理完全指南：5小时滚动窗口机制详解</div>
+        <div class="link-card-note">💬 周配额共享池，要注意别在开头就梭哈</div>
+        <div class="link-card-meta">
+          <span class="link-card-source">📺 B站</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">AI</div>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">工具</div>
+          <span class="link-card-time">今天</span>
+        </div>
+      </div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title">Spring Boot + MyBatis-Plus 最佳实践：从零搭建企业级后端</div>
+        <div class="link-card-note">💬 参考这个结构重新整一下 bookmark-demo 的分层</div>
+        <div class="link-card-meta">
+          <span class="link-card-source">🌐 掘金</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
+          <span class="link-card-time">昨天</span>
+        </div>
+      </div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title">认知科学视角下的深度学习：为什么"憋"比"刷"更有效</div>
+        <div class="link-card-note">💬 适合做个选题，和 spaced repetition 一起讲</div>
+        <div class="link-card-meta">
+          <span class="link-card-source">🐦 X</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">读书</div>
+          <span class="link-card-time">2天前</span>
+        </div>
+      </div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title">Oracle Cloud Always Free 完整上手：Ampere A1 ARM 实例配置</div>
+        <div class="link-card-note"></div>
+        <div class="link-card-meta">
+          <span class="link-card-source">🌐 Blog</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">待看</div>
+          <span class="link-card-time">3天前</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="bottom-nav">
+      <div class="bnav-item active">
+        <div class="bnav-icon">🏠</div>
+        <span>首页</span>
+      </div>
+      <div class="bnav-item" onclick="goto('search')">
+        <div class="bnav-icon">🔍</div>
+        <span>搜索</span>
+      </div>
+      <div class="bnav-item" onclick="goto('tags')">
+        <div class="bnav-icon">🏷️</div>
+        <span>标签</span>
+      </div>
+      <div class="bnav-item" onclick="goto('profile')">
+        <div class="bnav-icon">👤</div>
+        <span>我的</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SHARE IMPORT ==================== -->
+  <div class="screen" id="s-share">
+    <div class="scroll-area">
+      <div class="share-header">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 14px;">
+          <div style="font-size:16px;font-weight:700;">新增收藏</div>
+          <div style="font-size:13px;color:var(--text2);cursor:pointer;" onclick="goto('home')">跳过 →</div>
+        </div>
+        <div class="saved-badge">✅ 链接已保存</div>
+      </div>
+
+      <div class="link-preview">
+        <div class="link-preview-platform">📺 <span>哔哩哔哩</span></div>
+        <div class="link-preview-title">Claude Code 配额管理完全指南：5小时滚动窗口机制详解</div>
+        <div class="link-preview-url">https://www.bilibili.com/video/BV1xx411c7mD...</div>
+      </div>
+
+      <div class="share-section">
+        <span class="label">备注 <span style="color:var(--accent2)">（为什么保存它？）</span></span>
+        <textarea class="input-field" rows="3" placeholder="随手写下当时的判断，例如：后面照着配环境用、这个观点适合做选题参考…">周配额共享池，要注意别在开头就梭哈</textarea>
+        <div class="char-count">18 / 500</div>
+      </div>
+
+      <div class="share-section">
+        <span class="label">标签</span>
+        <div class="tag-select-area">
+          <div class="tag-chip pinned selected">📌 技术</div>
+          <div class="tag-chip selected">AI</div>
+          <div class="tag-chip">工具</div>
+          <div class="tag-chip">待看</div>
+          <div class="tag-chip">读书</div>
+          <div class="add-tag-chip" onclick="showAddTagHint()">＋ 新建标签</div>
+        </div>
+        <div id="add-tag-hint" style="display:none;margin-top:10px;">
+          <input type="text" class="input-field" placeholder="输入新标签名称，回车确认" style="font-size:13px;">
+        </div>
+      </div>
+
+      <div class="share-actions">
+        <button class="btn btn-primary" onclick="goto('home')" style="flex:2;">完成保存</button>
+        <button class="btn btn-ghost" onclick="goto('home')" style="flex:1;">回首页</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAGS ==================== -->
+  <div class="screen" id="s-tags">
+    <div class="page-header">
+      <div class="page-title">标签管理</div>
+      <div class="page-subtitle">共 12 个标签 · 点击标签可进入筛选</div>
+    </div>
+    <div class="scroll-area" style="padding:0 20px 20px;">
+
+      <div class="tag-manage-section" style="padding-top:16px;">
+        <div class="tag-section-label">📌 已置顶</div>
+        <div class="tag-list-item" onclick="openTagModal('技术')">
+          <div class="tag-pin-icon">📌</div>
+          <div class="tag-list-name">技术</div>
+          <div class="tag-list-count">18 个收藏</div>
+          <div class="tag-list-arrow">›</div>
+        </div>
+        <div class="tag-list-item" onclick="openTagModal('AI')">
+          <div class="tag-pin-icon">📌</div>
+          <div class="tag-list-name">AI</div>
+          <div class="tag-list-count">11 个收藏</div>
+          <div class="tag-list-arrow">›</div>
+        </div>
+      </div>
+
+      <div class="tag-manage-section" style="margin-top:16px;">
+        <div class="tag-section-label">普通标签（按收藏数排序）</div>
+        <div class="tag-list-item" onclick="goto('tagresult')">
+          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
+          <div class="tag-list-name">读书</div>
+          <div class="tag-list-count">8 个收藏</div>
+          <div class="tag-list-arrow">›</div>
+        </div>
+        <div class="tag-list-item" onclick="goto('tagresult')">
+          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
+          <div class="tag-list-name">工具</div>
+          <div class="tag-list-count">7 个收藏</div>
+          <div class="tag-list-arrow">›</div>
+        </div>
+        <div class="tag-list-item" onclick="goto('tagresult')">
+          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
+          <div class="tag-list-name">视频</div>
+          <div class="tag-list-count">6 个收藏</div>
+          <div class="tag-list-arrow">›</div>
+        </div>
+        <div class="tag-list-item" onclick="openTagModal('待看')">
+          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
+          <div class="tag-list-name">待看</div>
+          <div class="tag-list-count">5 个收藏</div>
+          <div class="tag-list-arrow">›</div>
+        </div>
+        <div class="tag-list-item" onclick="openDeleteTagModal()">
+          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
+          <div class="tag-list-name">草稿</div>
+          <div class="tag-list-count">0 个收藏</div>
+          <div class="tag-list-arrow">›</div>
+        </div>
+      </div>
+
+      <div style="padding-top:20px;">
+        <button class="btn btn-ghost" style="width:100%;text-align:center;border:1px dashed var(--border);">＋ 新建标签</button>
+      </div>
+    </div>
+
+    <!-- tag action modal -->
+    <div class="modal-overlay" id="tag-modal" onclick="closeTagModal(event)">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="tag-modal-name">AI</div>
+        <div class="modal-sub">11 个收藏</div>
+        <div class="modal-action" onclick="goto('tagresult');closeTagModal()">
+          <div class="modal-action-icon">🔍</div>
+          <div class="modal-action-text">查看该标签的所有收藏</div>
+        </div>
+        <div class="modal-action">
+          <div class="modal-action-icon">📌</div>
+          <div class="modal-action-text">取消置顶</div>
+        </div>
+        <div class="modal-action">
+          <div class="modal-action-icon">✏️</div>
+          <div class="modal-action-text">重命名</div>
+        </div>
+        <div class="modal-action">
+          <div class="modal-action-icon">🔀</div>
+          <div class="modal-action-text">合并到其他标签…</div>
+        </div>
+        <div class="modal-action danger" onclick="closeTagModal();openMergeConfirm()">
+          <div class="modal-action-icon">🗑️</div>
+          <div class="modal-action-text">删除标签（需先合并）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- delete 0-count confirm -->
+    <div class="confirm-modal-overlay" id="delete-confirm" onclick="closeDeleteConfirm(event)">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-title">删除标签"草稿"？</div>
+        <div class="confirm-body">该标签暂无关联收藏，删除后不可恢复。</div>
+        <div class="confirm-btns">
+          <button class="btn btn-ghost" onclick="closeDeleteConfirm()">取消</button>
+          <button class="btn btn-danger" onclick="closeDeleteConfirm()">确认删除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- merge confirm -->
+    <div class="confirm-modal-overlay" id="merge-confirm" onclick="closeMergeConfirm(event)">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-title">需要先合并标签</div>
+        <div class="confirm-body">该标签有 11 个关联收藏，删除前必须将其合并到另一个标签，合并后源标签自动删除。</div>
+        <div style="margin-bottom:14px;">
+          <span class="label">合并到</span>
+          <input type="text" class="input-field" placeholder="输入目标标签名" value="技术">
+        </div>
+        <div class="confirm-btns">
+          <button class="btn btn-ghost" onclick="closeMergeConfirm()">取消</button>
+          <button class="btn btn-primary" style="border:none;" onclick="closeMergeConfirm()">确认合并</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="goto('home')">
+        <div class="bnav-icon">🏠</div>
+        <span>首页</span>
+      </div>
+      <div class="bnav-item" onclick="goto('search')">
+        <div class="bnav-icon">🔍</div>
+        <span>搜索</span>
+      </div>
+      <div class="bnav-item active">
+        <div class="bnav-icon">🏷️</div>
+        <span>标签</span>
+      </div>
+      <div class="bnav-item" onclick="goto('profile')">
+        <div class="bnav-icon">👤</div>
+        <span>我的</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAG RESULT ==================== -->
+  <div class="screen" id="s-tagresult">
+    <div class="tag-result-header">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:18px;cursor:pointer;color:var(--text2);" onclick="goto('home')">←</span>
+        <span style="font-size:14px;font-weight:500;color:var(--text2);">标签筛选</span>
+      </div>
+      <div class="tag-result-name"><span class="tag-emoji">📌</span>技术</div>
+      <div class="tag-result-count">18 个收藏</div>
+      <div class="tags-row" style="padding:10px 0 0;margin:0;">
+        <div class="tag-chip selected" onclick="goto('tagresult')">技术</div>
+        <div class="tag-chip" onclick="goto('tagresult')">+ AI</div>
+        <div class="tag-chip" onclick="goto('tagresult')">+ 工具</div>
+        <div class="tag-chip" onclick="goto('tagresult')">+ 待看</div>
+      </div>
+    </div>
+    <div class="scroll-area">
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title">Spring Boot + MyBatis-Plus 最佳实践：从零搭建企业级后端</div>
+        <div class="link-card-note">💬 参考这个结构重新整一下 bookmark-demo 的分层</div>
+        <div class="link-card-meta">
+          <span class="link-card-source">🌐 掘金</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
+          <span class="link-card-time">昨天</span>
+        </div>
+      </div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title">Oracle Cloud Always Free 完整上手：Ampere A1 ARM 实例配置</div>
+        <div class="link-card-note"></div>
+        <div class="link-card-meta">
+          <span class="link-card-source">🌐 Blog</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">待看</div>
+          <span class="link-card-time">3天前</span>
+        </div>
+      </div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title">WSL2 + Clash Verge Tun 模式网络配置避坑指南</div>
+        <div class="link-card-note">💬 解决代理循环问题，取消 http_proxy 变量</div>
+        <div class="link-card-meta">
+          <span class="link-card-source">🌐 Blog</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
+          <span class="link-card-time">上周</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="goto('home')">
+        <div class="bnav-icon">🏠</div>
+        <span>首页</span>
+      </div>
+      <div class="bnav-item" onclick="goto('search')">
+        <div class="bnav-icon">🔍</div>
+        <span>搜索</span>
+      </div>
+      <div class="bnav-item" onclick="goto('tags')">
+        <div class="bnav-icon">🏷️</div>
+        <span>标签</span>
+      </div>
+      <div class="bnav-item" onclick="goto('profile')">
+        <div class="bnav-icon">👤</div>
+        <span>我的</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SEARCH ==================== -->
+  <div class="screen" id="s-search">
+    <div class="search-header">
+      <div class="search-input-row">
+        <div class="search-input-wrap" style="flex:1;">
+          <span class="search-icon-inner">🔍</span>
+          <input type="text" class="input-field" placeholder="搜索标题或备注…" value="Claude">
+        </div>
+        <div class="search-cancel" onclick="goto('home')">取消</div>
+      </div>
+      <div class="active-tags-row">
+        <div class="active-tag">AI <span class="active-tag-remove">✕</span></div>
+        <div style="font-size:11px;color:var(--text3);align-self:center;">+ 添加标签筛选</div>
+      </div>
+    </div>
+
+    <div class="scroll-area">
+      <div class="search-result-header">找到 <span class="highlight">3</span> 条结果（关键词 "Claude" · 标签 AI）</div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title"><span class="highlight">Claude</span> Code 配额管理完全指南：5小时滚动窗口机制详解</div>
+        <div class="link-card-note">💬 周配额共享池，要注意别在开头就梭哈</div>
+        <div class="link-card-meta">
+          <span class="link-card-source">📺 B站</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">AI</div>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">工具</div>
+          <span class="link-card-time">今天</span>
+        </div>
+      </div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title"><span class="highlight">Claude</span> Pro 5小时滚动窗口与周配额机制解析</div>
+        <div class="link-card-note"></div>
+        <div class="link-card-meta">
+          <span class="link-card-source">🌐 Reddit</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">AI</div>
+          <span class="link-card-time">上周</span>
+        </div>
+      </div>
+
+      <div class="link-card" onclick="goto('detail')">
+        <div class="link-card-title">Anthropic 发布 <span class="highlight">Claude</span> 4.5：性能与上下文长度全面提升</div>
+        <div class="link-card-note">💬 备注命中：对比 GPT-5 和 <span class="highlight">Claude</span> 4 的差异</div>
+        <div class="link-card-meta">
+          <span class="link-card-source">🌐 Verge</span>
+          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">AI</div>
+          <span class="link-card-time">3天前</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="goto('home')">
+        <div class="bnav-icon">🏠</div>
+        <span>首页</span>
+      </div>
+      <div class="bnav-item active">
+        <div class="bnav-icon">🔍</div>
+        <span>搜索</span>
+      </div>
+      <div class="bnav-item" onclick="goto('tags')">
+        <div class="bnav-icon">🏷️</div>
+        <span>标签</span>
+      </div>
+      <div class="bnav-item" onclick="goto('profile')">
+        <div class="bnav-icon">👤</div>
+        <span>我的</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DETAIL ==================== -->
+  <div class="screen" id="s-detail">
+    <div class="detail-header">
+      <div class="back-btn" onclick="goto('home')">←</div>
+      <div class="detail-header-title">链接详情</div>
+      <div class="detail-more">⋯</div>
+    </div>
+    <div class="scroll-area">
+      <div class="detail-body">
+        <div class="detail-platform-row">
+          <div class="platform-badge">📺 哔哩哔哩</div>
+          <div class="detail-time">2026-04-10 14:32</div>
+        </div>
+        <div class="detail-title">Claude Code 配额管理完全指南：5小时滚动窗口机制详解</div>
+
+        <div class="detail-section">
+          <div class="detail-section-label">我的备注</div>
+          <div class="detail-note">周配额共享池，要注意别在开头就梭哈。降版本到 2.1.34 可以绕过 prompt cache 失效 bug。</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-label">标签</div>
+          <div class="detail-tags">
+            <div class="tag-chip pinned" onclick="goto('tagresult')">📌 技术</div>
+            <div class="tag-chip" onclick="goto('tagresult')">AI</div>
+            <div class="tag-chip" onclick="goto('tagresult')">工具</div>
+            <div class="add-tag-chip">＋</div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-label">原始链接</div>
+          <div class="detail-url">https://www.bilibili.com/video/BV1xx411c7mD?vd_source=...</div>
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        <div class="open-link-btn">
+          🔗 打开原始链接
+        </div>
+        <div class="detail-secondary-actions">
+          <button class="btn btn-ghost" style="flex:1;text-align:center;">✏️ 编辑备注</button>
+          <button class="btn btn-ghost" style="flex:1;text-align:center;">🏷️ 调整标签</button>
+        </div>
+        <button class="btn btn-danger" style="width:100%;text-align:center;border-radius:8px;">🗑️ 删除这条收藏</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PROFILE ==================== -->
+  <div class="screen" id="s-profile">
+    <div class="scroll-area" style="padding-bottom:24px;">
+
+      <!-- 用户信息头部 -->
+      <div style="background:var(--bg);padding:28px 20px 20px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a78bfa);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">🦊</div>
+          <div style="flex:1;">
+            <div style="font-size:18px;font-weight:700;margin-bottom:3px;">风启自航</div>
+            <div style="font-size:12px;color:var(--text3);">+86 138****8888</div>
+          </div>
+          <div style="font-size:12px;color:var(--accent2);cursor:pointer;border:1px solid rgba(124,111,205,.4);padding:6px 12px;border-radius:20px;">编辑</div>
+        </div>
+        <!-- 数据统计 -->
+        <div style="display:flex;gap:0;background:var(--surface2);border-radius:12px;overflow:hidden;border:1px solid var(--border);">
+          <div style="flex:1;padding:14px 0;text-align:center;border-right:1px solid var(--border);">
+            <div style="font-size:22px;font-weight:700;color:var(--text);">47</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px;">全部收藏</div>
+          </div>
+          <div style="flex:1;padding:14px 0;text-align:center;border-right:1px solid var(--border);">
+            <div style="font-size:22px;font-weight:700;color:var(--accent2);">12</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px;">标签数</div>
+          </div>
+          <div style="flex:1;padding:14px 0;text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:var(--yellow);">6</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px;">未打标签</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 账号设置 -->
+      <div style="padding:16px 20px 0;">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">账号</div>
+        <div style="background:var(--surface2);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+          <div class="profile-row">
+            <span class="profile-row-icon">📱</span>
+            <span class="profile-row-label">手机号</span>
+            <span class="profile-row-value">+86 138****8888</span>
+            <span class="profile-row-arrow">›</span>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="profile-row">
+            <span class="profile-row-icon">📧</span>
+            <span class="profile-row-label">绑定邮箱</span>
+            <span class="profile-row-value" style="color:var(--text3);">未绑定</span>
+            <span class="profile-row-arrow">›</span>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="profile-row">
+            <span class="profile-row-icon">🖼️</span>
+            <span class="profile-row-label">头像与昵称</span>
+            <span class="profile-row-value">风启自航</span>
+            <span class="profile-row-arrow">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数据管理 -->
+      <div style="padding:16px 20px 0;">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">数据</div>
+        <div style="background:var(--surface2);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+          <div class="profile-row" onclick="goto('tags')">
+            <span class="profile-row-icon">🏷️</span>
+            <span class="profile-row-label">标签管理</span>
+            <span class="profile-row-value">12 个</span>
+            <span class="profile-row-arrow">›</span>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="profile-row">
+            <span class="profile-row-icon">📭</span>
+            <span class="profile-row-label">未打标签的收藏</span>
+            <span class="profile-row-value" style="color:var(--yellow);">6 条</span>
+            <span class="profile-row-arrow">›</span>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="profile-row">
+            <span class="profile-row-icon">📦</span>
+            <span class="profile-row-label">导出数据</span>
+            <span class="profile-row-value" style="color:var(--text3);">JSON / CSV</span>
+            <span class="profile-row-arrow">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 关于 -->
+      <div style="padding:16px 20px 0;">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">关于</div>
+        <div style="background:var(--surface2);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+          <div class="profile-row">
+            <span class="profile-row-icon">ℹ️</span>
+            <span class="profile-row-label">当前版本</span>
+            <span class="profile-row-value" style="color:var(--text3);font-family:'Space Mono',monospace;font-size:12px;">v1.0.0-MVP</span>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="profile-row">
+            <span class="profile-row-icon">📄</span>
+            <span class="profile-row-label">隐私政策</span>
+            <span class="profile-row-arrow">›</span>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="profile-row">
+            <span class="profile-row-icon">📋</span>
+            <span class="profile-row-label">用户协议</span>
+            <span class="profile-row-arrow">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 退出登录 -->
+      <div style="padding:20px 20px 0;">
+        <button class="btn btn-danger" style="width:100%;text-align:center;border-radius:10px;padding:14px;font-size:14px;" onclick="goto('login')">退出登录</button>
+      </div>
+
+    </div>
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="goto('home')">
+        <div class="bnav-icon">🏠</div>
+        <span>首页</span>
+      </div>
+      <div class="bnav-item" onclick="goto('search')">
+        <div class="bnav-icon">🔍</div>
+        <span>搜索</span>
+      </div>
+      <div class="bnav-item" onclick="goto('tags')">
+        <div class="bnav-icon">🏷️</div>
+        <span>标签</span>
+      </div>
+      <div class="bnav-item active">
+        <div class="bnav-icon">👤</div>
+        <span>我的</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /phone-frame -->
+</div><!-- /phone-wrapper -->
+
+<div style="height:32px;"></div>
+
+<script>
+  let current = 'login';
+
+  function goto(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('s-' + id).classList.add('active');
+    const map = {login:0,setup:1,home:2,share:3,tags:4,tagresult:5,search:6,detail:7,profile:8};
+    document.querySelectorAll('.nav-btn')[map[id]].classList.add('active');
+    current = id;
+    // scroll to top
+    const sa = document.getElementById('s-' + id).querySelector('.scroll-area');
+    if (sa) sa.scrollTop = 0;
+  }
+
+  function showAddTagHint() {
+    const h = document.getElementById('add-tag-hint');
+    h.style.display = h.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function openTagModal(name) {
+    document.getElementById('tag-modal-name').textContent = name;
+    document.getElementById('tag-modal').classList.add('open');
+  }
+  function closeTagModal(e) {
+    if (!e || e.target === document.getElementById('tag-modal')) {
+      document.getElementById('tag-modal').classList.remove('open');
+    }
+  }
+
+  function openDeleteTagModal() {
+    document.getElementById('delete-confirm').classList.add('open');
+  }
+  function closeDeleteConfirm(e) {
+    if (!e || e.target === document.getElementById('delete-confirm')) {
+      document.getElementById('delete-confirm').classList.remove('open');
+    }
+  }
+
+  function openMergeConfirm() {
+    document.getElementById('merge-confirm').classList.add('open');
+  }
+  function closeMergeConfirm(e) {
+    if (!e || e.target === document.getElementById('merge-confirm')) {
+      document.getElementById('merge-confirm').classList.remove('open');
+    }
+  }
+</script>
+</body>
+</html>
