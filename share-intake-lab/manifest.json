@@ -23,5 +23,6 @@
                 "dSYMs" : false
             }
         }
-    }
+    },
+    "vueVersion" : "3"
 }

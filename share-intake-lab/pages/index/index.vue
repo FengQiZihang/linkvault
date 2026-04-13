@@ -85,9 +85,10 @@ import {
   captureCurrentIntent,
   clearRecords,
   getPlatformOptions,
-  installIntentListener,
   listRecords,
-  updateRecordMeta
+  startIntentPolling,
+  updateRecordMeta,
+  waitForAppPlusReady
 } from '../../common/shareCapture'
 
 const records = ref([])
@@ -102,7 +103,8 @@ const checklist = [
   '6. 对比四条记录里的 action / type / EXTRA_TEXT / extras / clipData。'
 ]
 
-let removeIntentListener = null
+let stopPolling = null
+let stopPlusReadyWait = null
 
 const latestRecord = computed(() => records.value[0] || null)
 const latestJson = computed(() => (latestRecord.value ? formatRecord(latestRecord.value) : ''))
@@ -181,21 +183,26 @@ function formatTime(value) {
 onMounted(() => {
   refreshRecords()
   // #ifdef APP-PLUS
-  setTimeout(() => {
+  stopPlusReadyWait = waitForAppPlusReady((ready) => {
+    if (!ready) {
+      uni.showToast({ title: 'plus 环境初始化超时', icon: 'none' })
+      return
+    }
     captureIntent('app-mounted')
-    removeIntentListener = installIntentListener((result) => {
+    stopPolling = startIntentPolling((result) => {
       refreshRecords(result.records)
-      if (result.ok) {
-        uni.showToast({ title: '收到新的系统分享', icon: 'none' })
-      }
+      uni.showToast({ title: '收到新的系统分享', icon: 'none' })
     })
-  }, 300)
+  })
   // #endif
 })
 
 onBeforeUnmount(() => {
-  if (removeIntentListener) {
-    removeIntentListener()
+  if (stopPlusReadyWait) {
+    stopPlusReadyWait()
+  }
+  if (stopPolling) {
+    stopPolling()
   }
 })
 </script>

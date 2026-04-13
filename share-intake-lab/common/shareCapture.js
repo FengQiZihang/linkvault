@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'share_capture_records'
 const PLATFORM_OPTIONS = ['B站', 'YouTube', 'X', '微信公众号', '未标记']
+let lastCapturedSignature = ''
 
 function ensureAppPlus() {
   return typeof plus !== 'undefined' && plus.android
@@ -130,6 +131,21 @@ function collectIntentSnapshot(intent) {
   }
 }
 
+function buildSnapshotSignature(snapshot) {
+  return JSON.stringify({
+    action: snapshot.action || '',
+    type: snapshot.type || '',
+    dataString: snapshot.dataString || '',
+    extraText: snapshot.extraText || '',
+    extraSubject: snapshot.extraSubject || '',
+    extraHtmlText: snapshot.extraHtmlText || '',
+    extraStream: snapshot.extraStream || '',
+    extras: snapshot.extras || {},
+    clipData: snapshot.clipData || null,
+    rawIntent: snapshot.rawIntent || ''
+  })
+}
+
 function isShareIntentSnapshot(snapshot) {
   if (!snapshot) {
     return false
@@ -191,10 +207,15 @@ export function captureCurrentIntent(trigger = 'manual') {
   if (!isShareIntentSnapshot(snapshot)) {
     return { ok: false, message: '当前 Intent 不是系统分享数据' }
   }
+  const signature = buildSnapshotSignature(snapshot)
+  if (signature === lastCapturedSignature) {
+    return { ok: false, message: '当前分享数据与上一条相同，已跳过重复采集' }
+  }
   const records = loadRecords()
   const record = buildRecord(snapshot, trigger)
   records.unshift(record)
   saveRecords(records)
+  lastCapturedSignature = signature
   return { ok: true, record, records }
 }
 
@@ -219,19 +240,38 @@ export function updateRecordMeta(id, patch) {
 
 export function clearRecords() {
   saveRecords([])
+  lastCapturedSignature = ''
   return []
 }
 
-export function installIntentListener(callback) {
+export function waitForAppPlusReady(callback, options = {}) {
+  const intervalMs = options.intervalMs || 150
+  const timeoutMs = options.timeoutMs || 6000
+  const startTime = Date.now()
+  const timer = setInterval(() => {
+    if (ensureAppPlus()) {
+      clearInterval(timer)
+      callback(true)
+      return
+    }
+    if (Date.now() - startTime >= timeoutMs) {
+      clearInterval(timer)
+      callback(false)
+    }
+  }, intervalMs)
+  return () => clearInterval(timer)
+}
+
+export function startIntentPolling(callback, options = {}) {
+  const intervalMs = options.intervalMs || 1500
   if (!ensureAppPlus()) {
     return () => {}
   }
-  const handler = () => {
-    const result = captureCurrentIntent('newintent')
-    callback(result)
-  }
-  document.addEventListener('newintent', handler, false)
-  return () => {
-    document.removeEventListener('newintent', handler, false)
-  }
+  const timer = setInterval(() => {
+    const result = captureCurrentIntent('polling')
+    if (result.ok) {
+      callback(result)
+    }
+  }, intervalMs)
+  return () => clearInterval(timer)
 }
