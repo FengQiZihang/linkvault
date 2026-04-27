@@ -228,6 +228,20 @@
   }
   .home-greeting { font-size: 13px; color: var(--text2); }
   .home-title { font-size: 22px; font-weight: 700; margin: 2px 0 14px; letter-spacing: -.3px; }
+  .home-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 2px 0 14px; }
+  .home-title-row .home-title { margin: 0; }
+  .add-url-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Noto Sans SC', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+  }
   .search-bar {
     display: flex;
     align-items: center;
@@ -243,15 +257,13 @@
   .search-placeholder { font-size: 13px; color: var(--text3); flex: 1; }
   .search-icon { font-size: 16px; color: var(--text3); }
 
-  .quick-cards { display: flex; gap: 10px; padding: 16px 20px; overflow-x: auto; }
-  .quick-cards::-webkit-scrollbar { display: none; }
+  .quick-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 16px 20px; }
   .quick-card {
-    flex-shrink: 0;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 14px 16px;
-    min-width: 120px;
+    padding: 14px 12px;
+    min-width: 0;
     cursor: pointer;
     transition: border-color .15s;
   }
@@ -555,7 +567,10 @@
     <div class="scroll-area">
       <div class="home-header">
         <div class="home-greeting">下午好，风启自航 👋</div>
-        <div class="home-title">我的链接库</div>
+        <div class="home-title-row">
+          <div class="home-title">我的链接库</div>
+          <button class="add-url-btn" onclick="goto('share')">＋ 手动录入</button>
+        </div>
         <div class="search-bar" onclick="goto('search')">
           <span class="search-icon">🔍</span>
           <span class="search-placeholder">搜索标题或备注…</span>
@@ -564,20 +579,20 @@
 
       <!-- quick stats -->
       <div class="quick-cards">
-        <div class="quick-card special">
+        <div class="quick-card special" onclick="openAllResult()">
           <div class="quick-card-icon">🔖</div>
           <div class="quick-card-label">全部收藏</div>
-          <div class="quick-card-count">47</div>
+          <div class="quick-card-count" id="home-total-count">5</div>
         </div>
-        <div class="quick-card" onclick="goto('tagresult')">
+        <div class="quick-card" onclick="goto('tags')">
           <div class="quick-card-icon">🏷️</div>
           <div class="quick-card-label">标签数</div>
-          <div class="quick-card-count">12</div>
+          <div class="quick-card-count" id="home-tag-count">5</div>
         </div>
-        <div class="quick-card">
+        <div class="quick-card" onclick="openUntaggedResult()">
           <div class="quick-card-icon">📭</div>
           <div class="quick-card-label">未打标签</div>
-          <div class="quick-card-count">6</div>
+          <div class="quick-card-count" id="home-untagged-count">1</div>
         </div>
       </div>
 
@@ -586,62 +601,15 @@
         <div class="section-title">常用标签</div>
         <div class="section-action" onclick="goto('tags')">管理 →</div>
       </div>
-      <div class="tags-row">
-        <div class="tag-chip pinned" onclick="goto('tagresult')">📌 技术</div>
-        <div class="tag-chip pinned" onclick="goto('tagresult')">📌 架构</div>
-        <div class="tag-chip" onclick="goto('tagresult')">读书</div>
-        <div class="tag-chip" onclick="goto('tagresult')">工具</div>
-        <div class="tag-chip" onclick="goto('tagresult')">视频</div>
-        <div class="tag-chip" onclick="goto('tagresult')">待看</div>
-      </div>
+      <div class="tags-row" id="home-tags-row"></div>
 
       <!-- recent links -->
       <div class="section-header">
         <div class="section-title">最近保存</div>
-        <div class="section-action">全部</div>
+        <div class="section-action" onclick="openAllResult()">全部</div>
       </div>
 
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title">Kotlin 协程异常处理完全指南：SupervisorJob 与结构化并发</div>
-        <div class="link-card-note">💬 适合整理成登录态与网络请求层的异常兜底规范</div>
-        <div class="link-card-meta">
-          <span class="link-card-source">📺 B站</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">架构</div>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">工具</div>
-          <span class="link-card-time">今天</span>
-        </div>
-      </div>
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title">Spring Boot + MyBatis-Plus 最佳实践：从零搭建企业级后端</div>
-        <div class="link-card-note">💬 参考这个结构重新整一下 bookmark-demo 的分层</div>
-        <div class="link-card-meta">
-          <span class="link-card-source">🌐 掘金</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
-          <span class="link-card-time">昨天</span>
-        </div>
-      </div>
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title">认知科学视角下的深度学习：为什么"憋"比"刷"更有效</div>
-        <div class="link-card-note">💬 适合做个选题，和 spaced repetition 一起讲</div>
-        <div class="link-card-meta">
-          <span class="link-card-source">🐦 X</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">读书</div>
-          <span class="link-card-time">2天前</span>
-        </div>
-      </div>
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title">Oracle Cloud Always Free 完整上手：Ampere A1 ARM 实例配置</div>
-        <div class="link-card-note"></div>
-        <div class="link-card-meta">
-          <span class="link-card-source">🌐 Blog</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">待看</div>
-          <span class="link-card-time">3天前</span>
-        </div>
-      </div>
+      <div id="home-recent-list"></div>
 
     </div>
     <div class="bottom-nav">
@@ -672,29 +640,41 @@
           <div style="font-size:16px;font-weight:700;">手动新增收藏</div>
           <div style="font-size:13px;color:var(--text2);cursor:pointer;" onclick="goto('home')">跳过 →</div>
         </div>
+      </div>
+
+      <div class="share-section">
+        <span class="label">粘贴链接</span>
+        <textarea class="input-field" rows="3" placeholder="粘贴 Bilibili、YouTube、X、微信公众号等链接">https://b23.tv/DCVvWnI</textarea>
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button class="btn btn-primary" style="flex:1;padding:10px 16px;">解析链接</button>
+          <button class="btn btn-ghost" style="flex:0 0 auto;">清空</button>
+        </div>
+      </div>
+
+      <div class="share-section" style="padding-bottom:10px;">
         <div class="saved-badge">✅ 链接已保存</div>
       </div>
 
       <div class="link-preview">
-        <div class="link-preview-platform">📺 <span>哔哩哔哩</span></div>
-        <div class="link-preview-title">Kotlin 协程异常处理完全指南：SupervisorJob 与结构化并发</div>
-        <div class="link-preview-url">https://www.bilibili.com/video/BV1xx411c7mD...</div>
+        <div class="link-preview-platform">📺 <span>Bilibili · 杜雨说AI</span></div>
+        <div class="link-preview-title">Claude突然强实名认证，你的号被封了吗？</div>
+        <div class="link-preview-url">https://b23.tv/DCVvWnI</div>
       </div>
 
       <div class="share-section">
         <span class="label">备注 <span style="color:var(--accent2)">（为什么保存它？）</span></span>
-        <textarea class="input-field" rows="3" placeholder="随手写下当时的判断，例如：后面照着配环境用、这个观点适合做选题参考…">周配额共享池，要注意别在开头就梭哈</textarea>
-        <div class="char-count">18 / 500</div>
+        <textarea class="input-field" rows="3" placeholder="随手写下当时的判断，例如：后面照着配环境用、这个观点适合做选题参考…">关注 AI 服务账号风控与实名策略变化，后续可整理成账号安全清单。</textarea>
+        <div class="char-count">32 / 500</div>
       </div>
 
       <div class="share-section">
         <span class="label">标签</span>
         <div class="tag-select-area">
-          <div class="tag-chip pinned selected">📌 技术</div>
-          <div class="tag-chip selected">架构</div>
-          <div class="tag-chip">工具</div>
-          <div class="tag-chip">待看</div>
-          <div class="tag-chip">读书</div>
+          <div class="tag-chip pinned selected">📌 AI动态</div>
+          <div class="tag-chip selected">账号安全</div>
+          <div class="tag-chip">自动化</div>
+          <div class="tag-chip">AI工程</div>
+          <div class="tag-chip">产品观察</div>
           <div class="add-tag-chip" onclick="showAddTagHint()">＋ 新建标签</div>
         </div>
         <div id="add-tag-hint" style="display:none;margin-top:10px;">
@@ -713,58 +693,18 @@
   <div class="screen" id="s-tags">
     <div class="page-header">
       <div class="page-title">标签管理</div>
-      <div class="page-subtitle">共 12 个标签 · 点击标签可进入筛选</div>
+      <div class="page-subtitle" id="tags-page-subtitle">共 5 个标签 · 点击标签可进入筛选</div>
     </div>
     <div class="scroll-area" style="padding:0 20px 20px;">
 
       <div class="tag-manage-section" style="padding-top:16px;">
         <div class="tag-section-label">📌 已置顶</div>
-        <div class="tag-list-item" onclick="openTagModal('技术')">
-          <div class="tag-pin-icon">📌</div>
-          <div class="tag-list-name">技术</div>
-          <div class="tag-list-count">18 个收藏</div>
-          <div class="tag-list-arrow">›</div>
-        </div>
-        <div class="tag-list-item" onclick="openTagModal('架构')">
-          <div class="tag-pin-icon">📌</div>
-          <div class="tag-list-name">架构</div>
-          <div class="tag-list-count">11 个收藏</div>
-          <div class="tag-list-arrow">›</div>
-        </div>
+        <div id="pinned-tag-list"></div>
       </div>
 
       <div class="tag-manage-section" style="margin-top:16px;">
         <div class="tag-section-label">普通标签（按收藏数排序）</div>
-        <div class="tag-list-item" onclick="goto('tagresult')">
-          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
-          <div class="tag-list-name">读书</div>
-          <div class="tag-list-count">8 个收藏</div>
-          <div class="tag-list-arrow">›</div>
-        </div>
-        <div class="tag-list-item" onclick="goto('tagresult')">
-          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
-          <div class="tag-list-name">工具</div>
-          <div class="tag-list-count">7 个收藏</div>
-          <div class="tag-list-arrow">›</div>
-        </div>
-        <div class="tag-list-item" onclick="goto('tagresult')">
-          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
-          <div class="tag-list-name">视频</div>
-          <div class="tag-list-count">6 个收藏</div>
-          <div class="tag-list-arrow">›</div>
-        </div>
-        <div class="tag-list-item" onclick="openTagModal('待看')">
-          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
-          <div class="tag-list-name">待看</div>
-          <div class="tag-list-count">5 个收藏</div>
-          <div class="tag-list-arrow">›</div>
-        </div>
-        <div class="tag-list-item" onclick="openDeleteTagModal()">
-          <div class="tag-pin-icon" style="color:var(--text3);">○</div>
-          <div class="tag-list-name">草稿</div>
-          <div class="tag-list-count">0 个收藏</div>
-          <div class="tag-list-arrow">›</div>
-        </div>
+        <div id="normal-tag-list"></div>
       </div>
 
       <div style="padding-top:20px;">
@@ -776,9 +716,9 @@
     <div class="modal-overlay" id="tag-modal" onclick="closeTagModal(event)">
       <div class="modal-sheet" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
-        <div class="modal-title" id="tag-modal-name">架构</div>
-        <div class="modal-sub">11 个收藏</div>
-        <div class="modal-action" onclick="goto('tagresult');closeTagModal()">
+        <div class="modal-title" id="tag-modal-name">AI动态</div>
+        <div class="modal-sub" id="tag-modal-count">0 个收藏</div>
+        <div class="modal-action" onclick="openTagResultFromModal();closeTagModal()">
           <div class="modal-action-icon">🔍</div>
           <div class="modal-action-text">查看该标签的所有收藏</div>
         </div>
@@ -804,7 +744,7 @@
     <!-- delete 0-count confirm -->
     <div class="confirm-modal-overlay" id="delete-confirm" onclick="closeDeleteConfirm(event)">
       <div class="confirm-modal" onclick="event.stopPropagation()">
-        <div class="confirm-title">删除标签"草稿"？</div>
+        <div class="confirm-title">删除标签？</div>
         <div class="confirm-body">该标签暂无关联收藏，删除后不可恢复。</div>
         <div class="confirm-btns">
           <button class="btn btn-ghost" onclick="closeDeleteConfirm()">取消</button>
@@ -817,10 +757,10 @@
     <div class="confirm-modal-overlay" id="merge-confirm" onclick="closeMergeConfirm(event)">
       <div class="confirm-modal" onclick="event.stopPropagation()">
         <div class="confirm-title">需要先合并标签</div>
-        <div class="confirm-body">该标签有 11 个关联收藏，删除前必须将其合并到另一个标签，合并后源标签自动删除。</div>
+        <div class="confirm-body" id="merge-confirm-body">该标签有 1 个关联收藏，删除前必须将其合并到另一个标签，合并后源标签自动删除。</div>
         <div style="margin-bottom:14px;">
           <span class="label">合并到</span>
-          <input type="text" class="input-field" placeholder="输入目标标签名" value="技术">
+          <input type="text" class="input-field" placeholder="输入目标标签名" value="自动化">
         </div>
         <div class="confirm-btns">
           <button class="btn btn-ghost" onclick="closeMergeConfirm()">取消</button>
@@ -856,49 +796,11 @@
         <span style="font-size:18px;cursor:pointer;color:var(--text2);" onclick="goto('home')">←</span>
         <span style="font-size:14px;font-weight:500;color:var(--text2);">标签筛选</span>
       </div>
-      <div class="tag-result-name"><span class="tag-emoji">📌</span>技术</div>
-      <div class="tag-result-count">18 个收藏</div>
-      <div class="tags-row" style="padding:10px 0 0;margin:0;">
-        <div class="tag-chip selected" onclick="goto('tagresult')">技术</div>
-        <div class="tag-chip" onclick="goto('tagresult')">+ 架构</div>
-        <div class="tag-chip" onclick="goto('tagresult')">+ 工具</div>
-        <div class="tag-chip" onclick="goto('tagresult')">+ 待看</div>
-      </div>
+      <div class="tag-result-name" id="tag-result-name"><span class="tag-emoji">📌</span>AI动态</div>
+      <div class="tag-result-count" id="tag-result-count">2 个收藏</div>
+      <div class="tags-row" id="tag-result-filter-row" style="padding:10px 0 0;margin:0;"></div>
     </div>
-    <div class="scroll-area">
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title">Spring Boot + MyBatis-Plus 最佳实践：从零搭建企业级后端</div>
-        <div class="link-card-note">💬 参考这个结构重新整一下 bookmark-demo 的分层</div>
-        <div class="link-card-meta">
-          <span class="link-card-source">🌐 掘金</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
-          <span class="link-card-time">昨天</span>
-        </div>
-      </div>
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title">Oracle Cloud Always Free 完整上手：Ampere A1 ARM 实例配置</div>
-        <div class="link-card-note"></div>
-        <div class="link-card-meta">
-          <span class="link-card-source">🌐 Blog</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">待看</div>
-          <span class="link-card-time">3天前</span>
-        </div>
-      </div>
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title">WSL2 + Clash Verge Tun 模式网络配置避坑指南</div>
-        <div class="link-card-note">💬 解决代理循环问题，取消 http_proxy 变量</div>
-        <div class="link-card-meta">
-          <span class="link-card-source">🌐 Blog</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">技术</div>
-          <span class="link-card-time">上周</span>
-        </div>
-      </div>
-
-    </div>
+    <div class="scroll-area" id="tag-result-list"></div>
     <div class="bottom-nav">
       <div class="bnav-item" onclick="goto('home')">
         <div class="bnav-icon">🏠</div>
@@ -925,49 +827,19 @@
       <div class="search-input-row">
         <div class="search-input-wrap" style="flex:1;">
           <span class="search-icon-inner">🔍</span>
-          <input type="text" class="input-field" placeholder="搜索标题或备注…" value="Kotlin">
+          <input type="text" class="input-field" placeholder="搜索标题或备注…" value="AI">
         </div>
         <div class="search-cancel" onclick="goto('home')">取消</div>
       </div>
       <div class="active-tags-row">
-        <div class="active-tag">架构 <span class="active-tag-remove">✕</span></div>
+        <div class="active-tag">AI动态 <span class="active-tag-remove">✕</span></div>
         <div style="font-size:11px;color:var(--text3);align-self:center;">+ 添加标签筛选</div>
       </div>
     </div>
 
     <div class="scroll-area">
-      <div class="search-result-header">找到 <span class="highlight">3</span> 条结果（关键词 "Kotlin" · 标签 架构）</div>
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title"><span class="highlight">Kotlin</span> 协程异常处理完全指南：SupervisorJob 与结构化并发</div>
-        <div class="link-card-note">💬 适合整理成登录态与网络请求层的异常兜底规范</div>
-        <div class="link-card-meta">
-          <span class="link-card-source">📺 B站</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">架构</div>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">工具</div>
-          <span class="link-card-time">今天</span>
-        </div>
-      </div>
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title"><span class="highlight">Kotlin</span> Flow 背压与状态管理实践总结</div>
-        <div class="link-card-note"></div>
-        <div class="link-card-meta">
-          <span class="link-card-source">🌐 Reddit</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">架构</div>
-          <span class="link-card-time">上周</span>
-        </div>
-      </div>
-
-      <div class="link-card" onclick="goto('detail')">
-        <div class="link-card-title">Jetpack Compose 性能优化清单：列表、状态与重组控制</div>
-        <div class="link-card-note">💬 备注命中：适合对比 XML 方案下的复杂页面维护成本</div>
-        <div class="link-card-meta">
-          <span class="link-card-source">🌐 Verge</span>
-          <div class="tag-chip" style="padding:2px 8px;font-size:10px;">架构</div>
-          <span class="link-card-time">3天前</span>
-        </div>
-      </div>
+      <div class="search-result-header" id="search-result-header">找到 <span class="highlight">2</span> 条结果（关键词 "AI" · 标签 AI动态）</div>
+      <div id="search-result-list"></div>
     </div>
 
     <div class="bottom-nav">
@@ -1000,29 +872,24 @@
     <div class="scroll-area">
       <div class="detail-body">
         <div class="detail-platform-row">
-          <div class="platform-badge">📺 哔哩哔哩</div>
-          <div class="detail-time">2026-04-10 14:32</div>
+          <div class="platform-badge" id="detail-platform">📺 Bilibili · 杜雨说AI</div>
+          <div class="detail-time" id="detail-time">2026-04-16 08:12</div>
         </div>
-        <div class="detail-title">Kotlin 协程异常处理完全指南：SupervisorJob 与结构化并发</div>
+        <div class="detail-title" id="detail-title">Claude突然强实名认证，你的号被封了吗？</div>
 
         <div class="detail-section">
           <div class="detail-section-label">我的备注</div>
-          <div class="detail-note">周配额共享池，要注意别在开头就梭哈。降版本到 2.1.34 可以绕过 prompt cache 失效 bug。</div>
+          <div class="detail-note" id="detail-note">关注 AI 服务账号风控与实名策略变化，后续可整理成账号安全清单。</div>
         </div>
 
         <div class="detail-section">
           <div class="detail-section-label">标签</div>
-          <div class="detail-tags">
-            <div class="tag-chip pinned" onclick="goto('tagresult')">📌 技术</div>
-            <div class="tag-chip" onclick="goto('tagresult')">架构</div>
-            <div class="tag-chip" onclick="goto('tagresult')">工具</div>
-            <div class="add-tag-chip">＋</div>
-          </div>
+          <div class="detail-tags" id="detail-tags"></div>
         </div>
 
         <div class="detail-section">
           <div class="detail-section-label">原始链接</div>
-          <div class="detail-url">https://www.bilibili.com/video/BV1xx411c7mD?vd_source=...</div>
+          <div class="detail-url" id="detail-url">https://b23.tv/DCVvWnI</div>
         </div>
       </div>
 
@@ -1181,8 +1048,95 @@
 
 <script>
   let current = 'login';
+  let selectedBookmarkId = 1;
+  let selectedTagName = 'AI动态';
+  let modalTagName = 'AI动态';
+
+  const tags = [
+    { name: 'AI动态', pinned: true },
+    { name: '自动化', pinned: true },
+    { name: 'AI工程', pinned: false },
+    { name: '账号安全', pinned: false },
+    { name: '产品观察', pinned: false }
+  ];
+
+  const bookmarks = [
+    {
+      bookmarkId: 1,
+      linkId: 1,
+      originalUrl: 'https://b23.tv/DCVvWnI',
+      finalUrl: 'https://www.bilibili.com/video/BV1EYdhB4EH6/?-Arouter=story&buvid=XU51A7F5D98D54E4D11BC0590A7A041766691&from_spmid=tm.recommend.0.0&is_story_h5=false&mid=9OBJNMmjfBCq%2BcQkLAN%2BAg%3D%3D&p=1&plat_id=191&share_from=ugc&share_medium=android&share_plat=android&share_session_id=b076d2ac-46a1-436c-9c06-dc68bd7c5bca&share_source=GENERIC&share_tag=s_i&spmid=main.ugc-video-detail-vertical.0.0&timestamp=1776333107&unique_k=DCVvWnI&up_id=80569724',
+      platform: 'BILIBILI',
+      publisher: '杜雨说AI',
+      title: 'Claude突然强实名认证，你的号被封了吗？',
+      publishedAt: '2026-04-16T08:12:36.000Z',
+      savedAt: '2026-04-26T09:10:00.000Z',
+      note: '关注 AI 服务账号风控与实名策略变化，后续可整理成账号安全清单。',
+      tags: ['AI动态', '账号安全']
+    },
+    {
+      bookmarkId: 2,
+      linkId: 2,
+      originalUrl: 'https://youtu.be/nlK7-zuYDcs?si=K4bfM7OZxc2X9IJv',
+      finalUrl: 'https://www.youtube.com/watch?v=nlK7-zuYDcs',
+      platform: 'YOUTUBE',
+      publisher: '技术爬爬虾  TechShrimp',
+      title: '告别一切重复枯燥任务，CLI+Skill搭建AI浏览器自动化框架',
+      publishedAt: '2026-04-11T14:31:29.000Z',
+      savedAt: '2026-04-26T08:58:00.000Z',
+      note: '适合作为个人自动化工作流和 Skill 设计的参考样例。',
+      tags: ['自动化', 'AI工程']
+    },
+    {
+      bookmarkId: 3,
+      linkId: 3,
+      originalUrl: 'https://x.com/Khazix0918/status/2044258725536690270?s=20',
+      finalUrl: 'https://twitter.com/Khazix0918/status/2044258725536690270',
+      platform: 'X',
+      publisher: '数字生命卡兹克',
+      title: '一文带你看懂，火爆全网的Harness Engineering到底是个啥。',
+      publishedAt: '2026-04-15T03:37:15.000Z',
+      savedAt: '2026-04-25T21:30:00.000Z',
+      note: '用于补充 AI-Native 工程流程里对执行链路和上下文约束的理解。',
+      tags: ['AI工程']
+    },
+    {
+      bookmarkId: 4,
+      linkId: 4,
+      originalUrl: 'https://x.com/abskoop/status/2044718328401572208',
+      finalUrl: 'https://twitter.com/abskoop/status/2044718328401572208',
+      platform: 'X',
+      publisher: 'ahhhhfs',
+      title: 'Claude AI IP 风险检测工具🤡 检测当前Claude AI出口 IP ...',
+      publishedAt: '2026-04-16T10:03:33.000Z',
+      savedAt: '2026-04-25T17:22:00.000Z',
+      note: '',
+      tags: []
+    },
+    {
+      bookmarkId: 5,
+      linkId: 5,
+      originalUrl: 'https://mp.weixin.qq.com/s/1Z2H_SA0Hkv2yv8kxyiG2Q',
+      finalUrl: 'https://mp.weixin.qq.com/s/1Z2H_SA0Hkv2yv8kxyiG2Q?nwr_flag=1#wechat_redirect',
+      platform: 'WECHAT_OFFICIAL_ACCOUNT',
+      publisher: '新智元',
+      title: '谷歌悄悄加了个按钮，Gemini长出手脚变打工人！三巨头抢着教AI干活',
+      publishedAt: '2026-04-16T01:41:38.000Z',
+      savedAt: '2026-04-24T19:05:00.000Z',
+      note: '观察 Gemini 从问答工具走向可执行 Agent 的产品方向。',
+      tags: ['AI动态', '产品观察']
+    }
+  ];
+
+  const platformMap = {
+    BILIBILI: { icon: '📺', label: 'Bilibili' },
+    YOUTUBE: { icon: '▶️', label: 'YouTube' },
+    X: { icon: '𝕏', label: 'X' },
+    WECHAT_OFFICIAL_ACCOUNT: { icon: '💬', label: '微信公众号' }
+  };
 
   function goto(id) {
+    if (id === 'tagresult' && !selectedTagName) selectedTagName = 'AI动态';
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('s-' + id).classList.add('active');
@@ -1192,6 +1146,185 @@
     // scroll to top
     const sa = document.getElementById('s-' + id).querySelector('.scroll-area');
     if (sa) sa.scrollTop = 0;
+    renderAll();
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function platformText(bookmark) {
+    const platform = platformMap[bookmark.platform] || { icon: '🔗', label: bookmark.platform };
+    return `${platform.icon} ${platform.label} · ${bookmark.publisher}`;
+  }
+
+  function formatDateTime(value) {
+    const date = new Date(value);
+    const pad = n => String(n).padStart(2, '0');
+    return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+  }
+
+  function relativeSavedAt(bookmark) {
+    const order = bookmarks
+      .slice()
+      .sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt))
+      .findIndex(item => item.bookmarkId === bookmark.bookmarkId);
+    return ['刚刚', '今天', '昨天', '昨天', '2天前'][order] || '更早';
+  }
+
+  function tagCount(name) {
+    return bookmarks.filter(bookmark => bookmark.tags.includes(name)).length;
+  }
+
+  function tagChipHtml(name, options = {}) {
+    const tag = tags.find(item => item.name === name);
+    const pinned = tag && tag.pinned;
+    const selected = options.selected ? ' selected' : '';
+    const prefix = pinned ? '📌 ' : '';
+    return `<div class="tag-chip${pinned ? ' pinned' : ''}${selected}" style="${options.small ? 'padding:2px 8px;font-size:10px;' : ''}" onclick="event.stopPropagation();openTagResult('${escapeHtml(name)}')">${prefix}${escapeHtml(name)}</div>`;
+  }
+
+  function linkCardHtml(bookmark) {
+    const note = bookmark.note ? `<div class="link-card-note">💬 ${escapeHtml(bookmark.note)}</div>` : '';
+    const tagHtml = bookmark.tags.length
+      ? bookmark.tags.map(name => tagChipHtml(name, { small: true })).join('')
+      : '<div class="tag-chip" style="padding:2px 8px;font-size:10px;color:var(--text3);border-color:var(--border);background:transparent;">未打标签</div>';
+
+    return `
+      <div class="link-card" onclick="openDetail(${bookmark.bookmarkId})">
+        <div class="link-card-title">${escapeHtml(bookmark.title)}</div>
+        ${note}
+        <div class="link-card-meta">
+          <span class="link-card-source">${escapeHtml(platformText(bookmark))}</span>
+          ${tagHtml}
+          <span class="link-card-time">${relativeSavedAt(bookmark)}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function sortedBookmarks() {
+    return bookmarks.slice().sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+  }
+
+  function sortedTags() {
+    return tags
+      .map(tag => ({ ...tag, count: tagCount(tag.name) }))
+      .sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.count - a.count || a.name.localeCompare(b.name, 'zh-CN'));
+  }
+
+  function renderHome() {
+    document.getElementById('home-total-count').textContent = bookmarks.length;
+    document.getElementById('home-tag-count').textContent = tags.length;
+    document.getElementById('home-untagged-count').textContent = bookmarks.filter(bookmark => bookmark.tags.length === 0).length;
+    document.getElementById('home-tags-row').innerHTML = sortedTags()
+      .map(tag => tagChipHtml(tag.name))
+      .join('');
+    document.getElementById('home-recent-list').innerHTML = sortedBookmarks()
+      .slice(0, 5)
+      .map(linkCardHtml)
+      .join('');
+  }
+
+  function renderTags() {
+    document.getElementById('tags-page-subtitle').textContent = `共 ${tags.length} 个标签 · 点击标签可进入筛选`;
+    const tagItems = sortedTags();
+    const itemHtml = tag => `
+      <div class="tag-list-item" onclick="openTagModal('${escapeHtml(tag.name)}')">
+        <div class="tag-pin-icon">${tag.pinned ? '📌' : '○'}</div>
+        <div class="tag-list-name">${escapeHtml(tag.name)}</div>
+        <div class="tag-list-count">${tag.count} 个收藏</div>
+        <div class="tag-list-arrow">›</div>
+      </div>
+    `;
+    document.getElementById('pinned-tag-list').innerHTML = tagItems.filter(tag => tag.pinned).map(itemHtml).join('');
+    document.getElementById('normal-tag-list').innerHTML = tagItems.filter(tag => !tag.pinned).map(itemHtml).join('');
+  }
+
+  function renderTagResult() {
+    const isUntagged = selectedTagName === '__UNTAGGED__';
+    const isAll = selectedTagName === '__ALL__';
+    const result = isAll
+      ? sortedBookmarks()
+      : isUntagged
+        ? sortedBookmarks().filter(bookmark => bookmark.tags.length === 0)
+        : sortedBookmarks().filter(bookmark => bookmark.tags.includes(selectedTagName));
+    document.getElementById('tag-result-name').innerHTML = isAll
+      ? '<span class="tag-emoji">🔖</span>全部收藏'
+      : isUntagged
+      ? '<span class="tag-emoji">📭</span>未打标签'
+      : `<span class="tag-emoji">📌</span>${escapeHtml(selectedTagName)}`;
+    document.getElementById('tag-result-count').textContent = `${result.length} 个收藏`;
+    document.getElementById('tag-result-filter-row').innerHTML = sortedTags()
+      .filter(tag => tag.name !== selectedTagName)
+      .map(tag => `<div class="tag-chip" onclick="openTagResult('${escapeHtml(tag.name)}')">+ ${escapeHtml(tag.name)}</div>`)
+      .join('');
+    document.getElementById('tag-result-list').innerHTML = result.length
+      ? result.map(linkCardHtml).join('')
+      : '<div class="search-result-header">暂无收藏</div>';
+  }
+
+  function renderSearch() {
+    const keyword = 'AI';
+    const result = sortedBookmarks().filter(bookmark =>
+      bookmark.tags.includes('AI动态') &&
+      `${bookmark.title} ${bookmark.note} ${bookmark.publisher}`.toLowerCase().includes(keyword.toLowerCase())
+    );
+    document.getElementById('search-result-header').innerHTML = `找到 <span class="highlight">${result.length}</span> 条结果（关键词 "${keyword}" · 标签 AI动态）`;
+    document.getElementById('search-result-list').innerHTML = result.map(linkCardHtml).join('');
+  }
+
+  function renderDetail() {
+    const bookmark = bookmarks.find(item => item.bookmarkId === selectedBookmarkId) || bookmarks[0];
+    document.getElementById('detail-platform').textContent = platformText(bookmark);
+    document.getElementById('detail-time').textContent = formatDateTime(bookmark.publishedAt);
+    document.getElementById('detail-title').textContent = bookmark.title;
+    const noteEl = document.getElementById('detail-note');
+    noteEl.textContent = bookmark.note || '暂无备注';
+    noteEl.classList.toggle('empty', !bookmark.note);
+    document.getElementById('detail-tags').innerHTML = bookmark.tags.length
+      ? `${bookmark.tags.map(name => tagChipHtml(name)).join('')}<div class="add-tag-chip">＋</div>`
+      : '<div class="tag-chip" style="color:var(--text3);border-color:var(--border);background:transparent;">未打标签</div><div class="add-tag-chip">＋</div>';
+    document.getElementById('detail-url').textContent = bookmark.originalUrl;
+    const openBtn = document.querySelector('.open-link-btn');
+    openBtn.onclick = () => window.open(bookmark.originalUrl, '_blank');
+  }
+
+  function renderAll() {
+    renderHome();
+    renderTags();
+    renderTagResult();
+    renderSearch();
+    renderDetail();
+  }
+
+  function openDetail(bookmarkId) {
+    selectedBookmarkId = bookmarkId;
+    goto('detail');
+  }
+
+  function openTagResult(name) {
+    selectedTagName = name;
+    goto('tagresult');
+  }
+
+  function openUntaggedResult() {
+    selectedTagName = '__UNTAGGED__';
+    goto('tagresult');
+  }
+
+  function openAllResult() {
+    selectedTagName = '__ALL__';
+    goto('tagresult');
+  }
+
+  function openTagResultFromModal() {
+    openTagResult(modalTagName);
   }
 
   function showAddTagHint() {
@@ -1200,7 +1333,11 @@
   }
 
   function openTagModal(name) {
+    modalTagName = name;
+    const count = tagCount(name);
     document.getElementById('tag-modal-name').textContent = name;
+    document.getElementById('tag-modal-count').textContent = `${count} 个收藏`;
+    document.getElementById('merge-confirm-body').textContent = `该标签有 ${count} 个关联收藏，删除前必须将其合并到另一个标签，合并后源标签自动删除。`;
     document.getElementById('tag-modal').classList.add('open');
   }
   function closeTagModal(e) {
@@ -1226,6 +1363,8 @@
       document.getElementById('merge-confirm').classList.remove('open');
     }
   }
+
+  renderAll();
 </script>
 </body>
 </html>
