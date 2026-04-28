@@ -214,8 +214,11 @@
   /* ===== SCREEN: SETUP ===== */
   #s-setup .scroll-area { padding: 32px 28px; }
   .avatar-picker { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 32px; }
-  .avatar-circle { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 32px; border: 2px dashed rgba(255,255,255,.2); cursor: pointer; }
+  .avatar-circle { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 32px; border: 2px dashed rgba(255,255,255,.2); }
   .avatar-hint { font-size: 12px; color: var(--text3); }
+  .avatar-grid { display: grid; grid-template-columns: repeat(3, 56px); gap: 10px; justify-content: center; margin-top: 8px; }
+  .avatar-option { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; background: var(--surface2); border: 2px solid var(--border); cursor: pointer; }
+  .avatar-option.selected { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(167,139,250,.18); }
   .setup-step-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
   .setup-step-sub { font-size: 13px; color: var(--text2); margin-bottom: 32px; line-height: 1.6; }
 
@@ -305,6 +308,7 @@
   }
   .link-preview-platform { font-size: 11px; color: var(--text3); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
   .link-preview-title { font-size: 14px; font-weight: 500; line-height: 1.5; margin-bottom: 6px; }
+  .link-preview-time { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
   .link-preview-url { font-size: 11px; color: var(--text3); word-break: break-all; line-height: 1.5; }
   .share-section { padding: 0 20px 16px; }
   .char-count { font-size: 11px; color: var(--text3); text-align: right; margin-top: 4px; }
@@ -403,6 +407,21 @@
   .confirm-body { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
   .confirm-btns { display: flex; gap: 10px; }
   .confirm-btns .btn { flex: 1; text-align: center; border: none; }
+  .merge-target-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 180px; overflow-y: auto; }
+  .merge-target-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+  .merge-target-option:active { border-color: var(--accent); }
+  .merge-target-name { font-size: 14px; }
+  .merge-target-count { font-size: 12px; color: var(--text3); }
 
   /* ===== SCREEN: SEARCH ===== */
   #s-search .scroll-area { padding-bottom: 16px; }
@@ -413,8 +432,9 @@
   .search-input-wrap input { padding-left: 36px; }
   .search-cancel { font-size: 13px; color: var(--accent2); cursor: pointer; white-space: nowrap; }
   .active-tags-row { display: flex; gap: 6px; flex-wrap: wrap; }
-  .active-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(124,111,205,.25); border: 1px solid rgba(124,111,205,.5); color: var(--accent2); padding: 3px 8px; border-radius: 20px; font-size: 11px; }
-  .active-tag-remove { cursor: pointer; opacity: .7; }
+  .active-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(124,111,205,.25); border: 1px solid rgba(124,111,205,.5); color: var(--accent2); padding: 3px 8px; border-radius: 20px; font-size: 11px; cursor: pointer; }
+  .active-tag-remove { opacity: .7; }
+  .add-search-tag { font-size: 11px; color: var(--text3); align-self: center; cursor: pointer; }
 
   .search-result-header { padding: 10px 20px; font-size: 12px; color: var(--text3); }
   .highlight { color: var(--accent2); font-weight: 500; }
@@ -456,6 +476,7 @@
   .open-link-btn:active { background: #6a5fc0; }
   .detail-secondary-actions { display: flex; gap: 10px; }
   .detail-secondary-actions .btn { flex: 1; text-align: center; }
+  .detail-tag-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 
   /* ===== SCREEN: TAG RESULTS ===== */
   /* reuses link-card */
@@ -463,6 +484,10 @@
   .tag-result-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
   .tag-emoji { font-size: 18px; }
   .tag-result-count { font-size: 12px; color: var(--text2); }
+  .tag-filter-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .tag-filter-hint { font-size: 11px; color: var(--text3); }
+  .tag-filter-clear { font-size: 12px; color: var(--accent2); cursor: pointer; white-space: nowrap; }
+  .tag-filter-clear.disabled { color: var(--text3); cursor: default; }
 
   /* ===== SCREEN: PROFILE ===== */
   .profile-row {
@@ -502,6 +527,7 @@
   <button class="nav-btn" onclick="goto('search')">搜索</button>
   <button class="nav-btn" onclick="goto('detail')">链接详情</button>
   <button class="nav-btn" onclick="goto('profile')">我的</button>
+  <button class="nav-btn" onclick="goto('profile-edit')">编辑用户</button>
 </div>
 
 <div class="phone-wrapper">
@@ -534,7 +560,7 @@
           <span class="label">验证码</span>
           <div class="phone-row">
             <input type="text" class="input-field" placeholder="6位验证码" style="flex:1;">
-            <button class="send-code-btn">发送验证码</button>
+            <button class="send-code-btn" onclick="openInfoModal('验证码已发送', '验证码有效期 5 分钟，同手机号 60 秒内只能发送 1 次。')">发送验证码</button>
           </div>
         </div>
         <button class="btn btn-primary" onclick="goto('setup')" style="margin-top:8px;">登录 / 注册</button>
@@ -547,10 +573,21 @@
   <div class="screen" id="s-setup">
     <div class="scroll-area" style="padding:32px 28px;">
       <div class="setup-step-title">完善个人信息</div>
-      <div class="setup-step-sub">设置昵称和头像，让你的收藏库更有辨识度。</div>
+      <div class="setup-step-sub">设置昵称，并从预置头像中选一个代表你。</div>
       <div class="avatar-picker">
         <div class="avatar-circle">🦊</div>
-        <div class="avatar-hint">点击更换头像</div>
+        <div class="avatar-hint">选择一个头像</div>
+        <div class="avatar-grid">
+          <div class="avatar-option selected" onclick="selectAvatar(this)">🦊</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🌙</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">⚡</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🚀</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🎧</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">💎</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🌿</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🔥</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">⭐</div>
+        </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:14px;">
         <div>
@@ -558,6 +595,42 @@
           <input type="text" class="input-field" placeholder="给自己起个名字" value="风启自航">
         </div>
         <button class="btn btn-primary" onclick="goto('home')" style="margin-top:8px;">进入 LinkVault →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PROFILE EDIT ==================== -->
+  <div class="screen" id="s-profile-edit">
+    <div class="detail-header">
+      <div class="back-btn" onclick="goto('profile')">←</div>
+      <div class="detail-header-title">编辑用户资料</div>
+      <div style="width:28px;"></div>
+    </div>
+    <div class="scroll-area" style="padding:32px 28px;">
+      <div class="setup-step-title">头像与昵称</div>
+      <div class="setup-step-sub">修改昵称，并从预置头像中选一个代表你。</div>
+      <div class="avatar-picker">
+        <div class="avatar-circle">🦊</div>
+        <div class="avatar-hint">当前头像</div>
+        <div class="avatar-grid">
+          <div class="avatar-option selected" onclick="selectAvatar(this)">🦊</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🌙</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">⚡</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🚀</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🎧</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">💎</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🌿</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">🔥</div>
+          <div class="avatar-option" onclick="selectAvatar(this)">⭐</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <span class="label">昵称</span>
+          <input type="text" class="input-field" placeholder="给自己起个名字" value="风启自航">
+        </div>
+        <button class="btn btn-primary" onclick="goto('profile')" style="margin-top:8px;">保存修改</button>
+        <button class="btn btn-ghost" onclick="goto('profile')" style="width:100%;text-align:center;">取消</button>
       </div>
     </div>
   </div>
@@ -634,20 +707,18 @@
 
   <!-- ==================== SHARE IMPORT ==================== -->
   <div class="screen" id="s-share">
+    <div class="detail-header">
+      <div class="back-btn" onclick="goto('home')">←</div>
+      <div class="detail-header-title">手动新增收藏</div>
+      <div style="width:28px;"></div>
+    </div>
     <div class="scroll-area">
-      <div class="share-header">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 14px;">
-          <div style="font-size:16px;font-weight:700;">手动新增收藏</div>
-          <div style="font-size:13px;color:var(--text2);cursor:pointer;" onclick="goto('home')">跳过 →</div>
-        </div>
-      </div>
-
       <div class="share-section">
         <span class="label">粘贴链接</span>
         <textarea class="input-field" rows="3" placeholder="粘贴 Bilibili、YouTube、X、微信公众号等链接">https://b23.tv/DCVvWnI</textarea>
         <div style="display:flex;gap:10px;margin-top:10px;">
-          <button class="btn btn-primary" style="flex:1;padding:10px 16px;">解析链接</button>
-          <button class="btn btn-ghost" style="flex:0 0 auto;">清空</button>
+          <button class="btn btn-primary" style="flex:1;padding:10px 16px;" onclick="this.textContent='已解析'">解析链接</button>
+          <button class="btn btn-ghost" style="flex:0 0 auto;" onclick="openClearUrlConfirm()">清空</button>
         </div>
       </div>
 
@@ -658,6 +729,7 @@
       <div class="link-preview">
         <div class="link-preview-platform">📺 <span>Bilibili · 杜雨说AI</span></div>
         <div class="link-preview-title">Claude突然强实名认证，你的号被封了吗？</div>
+        <div class="link-preview-time">发布时间：2026-04-16 16:12</div>
         <div class="link-preview-url">https://b23.tv/DCVvWnI</div>
       </div>
 
@@ -670,12 +742,12 @@
       <div class="share-section">
         <span class="label">标签</span>
         <div class="tag-select-area">
-          <div class="tag-chip pinned selected">📌 AI动态</div>
-          <div class="tag-chip selected">账号安全</div>
-          <div class="tag-chip">自动化</div>
-          <div class="tag-chip">AI工程</div>
-          <div class="tag-chip">产品观察</div>
-          <div class="add-tag-chip" onclick="showAddTagHint()">＋ 新建标签</div>
+          <div class="tag-chip pinned selected" onclick="toggleChipSelected(this)">📌 AI动态</div>
+          <div class="tag-chip selected" onclick="toggleChipSelected(this)">账号安全</div>
+          <div class="tag-chip" onclick="toggleChipSelected(this)">自动化</div>
+          <div class="tag-chip" onclick="toggleChipSelected(this)">AI工程</div>
+          <div class="tag-chip" onclick="toggleChipSelected(this)">产品观察</div>
+          <div class="add-tag-chip" onclick="openCreateTagModal()">＋ 新建标签</div>
         </div>
         <div id="add-tag-hint" style="display:none;margin-top:10px;">
           <input type="text" class="input-field" placeholder="输入新标签名称，回车确认" style="font-size:13px;">
@@ -683,8 +755,7 @@
       </div>
 
       <div class="share-actions">
-        <button class="btn btn-primary" onclick="goto('home')" style="flex:2;">完成保存</button>
-        <button class="btn btn-ghost" onclick="goto('home')" style="flex:1;">回首页</button>
+        <button class="btn btn-primary" onclick="goto('home')">完成保存</button>
       </div>
     </div>
   </div>
@@ -708,7 +779,7 @@
       </div>
 
       <div style="padding-top:20px;">
-        <button class="btn btn-ghost" style="width:100%;text-align:center;border:1px dashed var(--border);">＋ 新建标签</button>
+        <button class="btn btn-ghost" style="width:100%;text-align:center;border:1px dashed var(--border);" onclick="openCreateTagModal()">＋ 新建标签</button>
       </div>
     </div>
 
@@ -722,21 +793,37 @@
           <div class="modal-action-icon">🔍</div>
           <div class="modal-action-text">查看该标签的所有收藏</div>
         </div>
-        <div class="modal-action">
+        <div class="modal-action" onclick="closeTagModal()">
           <div class="modal-action-icon">📌</div>
           <div class="modal-action-text">取消置顶</div>
         </div>
-        <div class="modal-action">
+        <div class="modal-action" onclick="closeTagModal();openRenameConfirm()">
           <div class="modal-action-icon">✏️</div>
           <div class="modal-action-text">重命名</div>
         </div>
-        <div class="modal-action">
+        <div class="modal-action" onclick="closeTagModal();openMergeConfirm()">
           <div class="modal-action-icon">🔀</div>
           <div class="modal-action-text">合并到其他标签…</div>
         </div>
-        <div class="modal-action danger" onclick="closeTagModal();openMergeConfirm()">
+        <div class="modal-action danger" onclick="closeTagModal();openDeleteTagModal()">
           <div class="modal-action-icon">🗑️</div>
-          <div class="modal-action-text">删除标签（需先合并）</div>
+          <div class="modal-action-text">删除标签（仅允许删除无关联的标签）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- rename confirm -->
+    <div class="confirm-modal-overlay" id="rename-confirm" onclick="closeRenameConfirm(event)">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-title">重命名标签</div>
+        <div class="confirm-body">标签名同一用户下唯一，最长 20 字。</div>
+        <div style="margin-bottom:14px;">
+          <span class="label">新名称</span>
+          <input type="text" class="input-field" id="rename-tag-input" placeholder="输入新的标签名称" value="AI动态">
+        </div>
+        <div class="confirm-btns">
+          <button class="btn btn-ghost" onclick="closeRenameConfirm()">取消</button>
+          <button class="btn btn-primary" style="border:none;" onclick="closeRenameConfirm()">确认</button>
         </div>
       </div>
     </div>
@@ -745,7 +832,7 @@
     <div class="confirm-modal-overlay" id="delete-confirm" onclick="closeDeleteConfirm(event)">
       <div class="confirm-modal" onclick="event.stopPropagation()">
         <div class="confirm-title">删除标签？</div>
-        <div class="confirm-body">该标签暂无关联收藏，删除后不可恢复。</div>
+        <div class="confirm-body" id="delete-confirm-body">仅允许删除无关联的标签；有关联收藏的标签需要先合并到其他标签。</div>
         <div class="confirm-btns">
           <button class="btn btn-ghost" onclick="closeDeleteConfirm()">取消</button>
           <button class="btn btn-danger" onclick="closeDeleteConfirm()">确认删除</button>
@@ -756,15 +843,23 @@
     <!-- merge confirm -->
     <div class="confirm-modal-overlay" id="merge-confirm" onclick="closeMergeConfirm(event)">
       <div class="confirm-modal" onclick="event.stopPropagation()">
-        <div class="confirm-title">需要先合并标签</div>
-        <div class="confirm-body" id="merge-confirm-body">该标签有 1 个关联收藏，删除前必须将其合并到另一个标签，合并后源标签自动删除。</div>
-        <div style="margin-bottom:14px;">
-          <span class="label">合并到</span>
-          <input type="text" class="input-field" placeholder="输入目标标签名" value="自动化">
-        </div>
+        <div class="confirm-title">合并到其他标签</div>
+        <div class="confirm-body" id="merge-confirm-body">选择目标标签后，当前标签的收藏关系会迁移过去，源标签自动删除。</div>
+        <div class="merge-target-list" id="merge-target-list"></div>
         <div class="confirm-btns">
           <button class="btn btn-ghost" onclick="closeMergeConfirm()">取消</button>
-          <button class="btn btn-primary" style="border:none;" onclick="closeMergeConfirm()">确认合并</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- merge final confirm -->
+    <div class="confirm-modal-overlay" id="merge-final-confirm" onclick="closeMergeFinalConfirm(event)">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-title">确认合并标签？</div>
+        <div class="confirm-body" id="merge-final-body">合并后源标签会自动删除。</div>
+        <div class="confirm-btns">
+          <button class="btn btn-ghost" onclick="closeMergeFinalConfirm()">取消</button>
+          <button class="btn btn-primary" style="border:none;" onclick="confirmMergeFinal()">确认合并</button>
         </div>
       </div>
     </div>
@@ -796,29 +891,15 @@
         <span style="font-size:18px;cursor:pointer;color:var(--text2);" onclick="goto('home')">←</span>
         <span style="font-size:14px;font-weight:500;color:var(--text2);">标签筛选</span>
       </div>
-      <div class="tag-result-name" id="tag-result-name"><span class="tag-emoji">📌</span>AI动态</div>
-      <div class="tag-result-count" id="tag-result-count">2 个收藏</div>
+      <div class="tag-result-name" id="tag-result-name"><span class="tag-emoji">🔖</span>全部收藏</div>
+      <div class="tag-result-count" id="tag-result-count">5 个收藏</div>
+      <div class="tag-filter-toolbar">
+        <div class="tag-filter-hint">可选择多个标签，结果同时满足所有已选标签</div>
+        <div class="tag-filter-clear disabled" id="tag-filter-clear" onclick="clearTagFilters()">清除</div>
+      </div>
       <div class="tags-row" id="tag-result-filter-row" style="padding:10px 0 0;margin:0;"></div>
     </div>
     <div class="scroll-area" id="tag-result-list"></div>
-    <div class="bottom-nav">
-      <div class="bnav-item" onclick="goto('home')">
-        <div class="bnav-icon">🏠</div>
-        <span>首页</span>
-      </div>
-      <div class="bnav-item" onclick="goto('search')">
-        <div class="bnav-icon">🔍</div>
-        <span>搜索</span>
-      </div>
-      <div class="bnav-item" onclick="goto('tags')">
-        <div class="bnav-icon">🏷️</div>
-        <span>标签</span>
-      </div>
-      <div class="bnav-item" onclick="goto('profile')">
-        <div class="bnav-icon">👤</div>
-        <span>我的</span>
-      </div>
-    </div>
   </div>
 
   <!-- ==================== SEARCH ==================== -->
@@ -831,9 +912,9 @@
         </div>
         <div class="search-cancel" onclick="goto('home')">取消</div>
       </div>
-      <div class="active-tags-row">
-        <div class="active-tag">AI动态 <span class="active-tag-remove">✕</span></div>
-        <div style="font-size:11px;color:var(--text3);align-self:center;">+ 添加标签筛选</div>
+      <div class="active-tags-row" id="search-active-tags">
+        <div class="active-tag" onclick="removeSearchTag('AI动态')">AI动态 <span class="active-tag-remove">✕</span></div>
+        <div class="add-search-tag" onclick="openSearchTagModal()">+ 添加标签筛选</div>
       </div>
     </div>
 
@@ -860,6 +941,19 @@
         <span>我的</span>
       </div>
     </div>
+
+    <!-- search tag filter modal -->
+    <div class="confirm-modal-overlay" id="search-tag-modal" onclick="closeSearchTagModal(event)">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-title">添加标签筛选</div>
+        <div class="confirm-body">选择搜索结果需要同时满足的标签。</div>
+        <div class="detail-tag-picker" id="search-tag-picker"></div>
+        <div class="confirm-btns">
+          <button class="btn btn-ghost" onclick="closeSearchTagModal()">取消</button>
+          <button class="btn btn-primary" style="border:none;" onclick="closeSearchTagModal()">确认</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== DETAIL ==================== -->
@@ -867,13 +961,13 @@
     <div class="detail-header">
       <div class="back-btn" onclick="goto('home')">←</div>
       <div class="detail-header-title">链接详情</div>
-      <div class="detail-more">⋯</div>
+      <div class="detail-more" onclick="openDetailMoreModal()">⋯</div>
     </div>
     <div class="scroll-area">
       <div class="detail-body">
         <div class="detail-platform-row">
           <div class="platform-badge" id="detail-platform">📺 Bilibili · 杜雨说AI</div>
-          <div class="detail-time" id="detail-time">2026-04-16 08:12</div>
+          <div class="detail-time" id="detail-time">2026-04-16 16:12</div>
         </div>
         <div class="detail-title" id="detail-title">Claude突然强实名认证，你的号被封了吗？</div>
 
@@ -898,10 +992,72 @@
           🔗 打开原始链接
         </div>
         <div class="detail-secondary-actions">
-          <button class="btn btn-ghost" style="flex:1;text-align:center;">✏️ 编辑备注</button>
-          <button class="btn btn-ghost" style="flex:1;text-align:center;">🏷️ 调整标签</button>
+          <button class="btn btn-ghost" style="flex:1;text-align:center;" onclick="openDetailNoteModal()">✏️ 编辑备注</button>
+          <button class="btn btn-ghost" style="flex:1;text-align:center;" onclick="openDetailTagsModal()">🏷️ 调整标签</button>
         </div>
-        <button class="btn btn-danger" style="width:100%;text-align:center;border-radius:8px;">🗑️ 删除这条收藏</button>
+        <button class="btn btn-danger" style="width:100%;text-align:center;border-radius:8px;" onclick="openDeleteBookmarkConfirm()">🗑️ 删除这条收藏</button>
+      </div>
+    </div>
+
+    <!-- detail more action modal -->
+    <div class="modal-overlay" id="detail-more-modal" onclick="closeDetailMoreModal(event)">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-title">更多操作</div>
+        <div class="modal-sub">针对当前收藏执行操作</div>
+        <div class="modal-action" onclick="closeDetailMoreModal();openInfoModal('已复制链接', '原始链接已复制到剪贴板。')">
+          <div class="modal-action-icon">🔗</div>
+          <div class="modal-action-text">复制原始链接</div>
+        </div>
+        <div class="modal-action" onclick="closeDetailMoreModal();openInfoModal('已发起重试', '元信息状态已重置为 PENDING，后台会重新抓取。')">
+          <div class="modal-action-icon">🔄</div>
+          <div class="modal-action-text">重试元信息抓取</div>
+        </div>
+        <div class="modal-action danger" onclick="closeDetailMoreModal();openDeleteBookmarkConfirm()">
+          <div class="modal-action-icon">🗑️</div>
+          <div class="modal-action-text">删除这条收藏</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- edit note modal -->
+    <div class="confirm-modal-overlay" id="detail-note-modal" onclick="closeDetailNoteModal(event)">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-title">编辑备注</div>
+        <div class="confirm-body">记录这条收藏对你有用的原因。</div>
+        <div style="margin-bottom:14px;">
+          <span class="label">我的备注</span>
+          <textarea class="input-field" id="detail-note-input" rows="5" placeholder="写下为什么保存它"></textarea>
+        </div>
+        <div class="confirm-btns">
+          <button class="btn btn-ghost" onclick="closeDetailNoteModal()">取消</button>
+          <button class="btn btn-primary" style="border:none;" onclick="closeDetailNoteModal()">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- edit tags modal -->
+    <div class="confirm-modal-overlay" id="detail-tags-modal" onclick="closeDetailTagsModal(event)">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-title">调整标签</div>
+        <div class="confirm-body">选择这条收藏关联的标签，可多选。</div>
+        <div class="detail-tag-picker" id="detail-tag-picker"></div>
+        <div class="confirm-btns">
+          <button class="btn btn-ghost" onclick="closeDetailTagsModal()">取消</button>
+          <button class="btn btn-primary" style="border:none;" onclick="closeDetailTagsModal()">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- delete bookmark confirm -->
+    <div class="confirm-modal-overlay" id="delete-bookmark-confirm" onclick="closeDeleteBookmarkConfirm(event)">
+      <div class="confirm-modal" onclick="event.stopPropagation()">
+        <div class="confirm-title">删除这条收藏？</div>
+        <div class="confirm-body">只会删除当前用户的收藏关系和标签关系，不会删除链接元信息。</div>
+        <div class="confirm-btns">
+          <button class="btn btn-ghost" onclick="closeDeleteBookmarkConfirm()">取消</button>
+          <button class="btn btn-danger" onclick="closeDeleteBookmarkConfirm()">确认删除</button>
+        </div>
       </div>
     </div>
   </div>
@@ -918,20 +1074,20 @@
             <div style="font-size:18px;font-weight:700;margin-bottom:3px;">风启自航</div>
             <div style="font-size:12px;color:var(--text3);">+86 138****8888</div>
           </div>
-          <div style="font-size:12px;color:var(--accent2);cursor:pointer;border:1px solid rgba(124,111,205,.4);padding:6px 12px;border-radius:20px;">编辑</div>
+          <div style="font-size:12px;color:var(--accent2);cursor:pointer;border:1px solid rgba(124,111,205,.4);padding:6px 12px;border-radius:20px;" onclick="goto('profile-edit')">编辑</div>
         </div>
         <!-- 数据统计 -->
         <div style="display:flex;gap:0;background:var(--surface2);border-radius:12px;overflow:hidden;border:1px solid var(--border);">
           <div style="flex:1;padding:14px 0;text-align:center;border-right:1px solid var(--border);">
-            <div style="font-size:22px;font-weight:700;color:var(--text);">47</div>
+            <div style="font-size:22px;font-weight:700;color:var(--text);">5</div>
             <div style="font-size:11px;color:var(--text3);margin-top:3px;">全部收藏</div>
           </div>
           <div style="flex:1;padding:14px 0;text-align:center;border-right:1px solid var(--border);">
-            <div style="font-size:22px;font-weight:700;color:var(--accent2);">12</div>
+            <div style="font-size:22px;font-weight:700;color:var(--accent2);">5</div>
             <div style="font-size:11px;color:var(--text3);margin-top:3px;">标签数</div>
           </div>
           <div style="flex:1;padding:14px 0;text-align:center;">
-            <div style="font-size:22px;font-weight:700;color:var(--yellow);">6</div>
+            <div style="font-size:22px;font-weight:700;color:var(--yellow);">1</div>
             <div style="font-size:11px;color:var(--text3);margin-top:3px;">未打标签</div>
           </div>
         </div>
@@ -941,21 +1097,21 @@
       <div style="padding:16px 20px 0;">
         <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">账号</div>
         <div style="background:var(--surface2);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
-          <div class="profile-row">
+          <div class="profile-row" onclick="openInfoModal('手机号', '手机号是当前账号的登录标识，MVP 阶段暂不支持换绑。')">
             <span class="profile-row-icon">📱</span>
             <span class="profile-row-label">手机号</span>
             <span class="profile-row-value">+86 138****8888</span>
             <span class="profile-row-arrow">›</span>
           </div>
           <div class="profile-divider"></div>
-          <div class="profile-row">
+          <div class="profile-row" onclick="openInfoModal('绑定邮箱', 'MVP 阶段暂不支持邮箱绑定。')">
             <span class="profile-row-icon">📧</span>
             <span class="profile-row-label">绑定邮箱</span>
             <span class="profile-row-value" style="color:var(--text3);">未绑定</span>
             <span class="profile-row-arrow">›</span>
           </div>
           <div class="profile-divider"></div>
-          <div class="profile-row">
+          <div class="profile-row" onclick="goto('profile-edit')">
             <span class="profile-row-icon">🖼️</span>
             <span class="profile-row-label">头像与昵称</span>
             <span class="profile-row-value">风启自航</span>
@@ -971,18 +1127,18 @@
           <div class="profile-row" onclick="goto('tags')">
             <span class="profile-row-icon">🏷️</span>
             <span class="profile-row-label">标签管理</span>
-            <span class="profile-row-value">12 个</span>
+            <span class="profile-row-value">5 个</span>
             <span class="profile-row-arrow">›</span>
           </div>
           <div class="profile-divider"></div>
-          <div class="profile-row">
+          <div class="profile-row" onclick="openUntaggedResult()">
             <span class="profile-row-icon">📭</span>
             <span class="profile-row-label">未打标签的收藏</span>
-            <span class="profile-row-value" style="color:var(--yellow);">6 条</span>
+            <span class="profile-row-value" style="color:var(--yellow);">1 条</span>
             <span class="profile-row-arrow">›</span>
           </div>
           <div class="profile-divider"></div>
-          <div class="profile-row">
+          <div class="profile-row" onclick="openInfoModal('导出数据', 'MVP 阶段暂不提供数据导出接口。')">
             <span class="profile-row-icon">📦</span>
             <span class="profile-row-label">导出数据</span>
             <span class="profile-row-value" style="color:var(--text3);">JSON / CSV</span>
@@ -995,19 +1151,19 @@
       <div style="padding:16px 20px 0;">
         <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">关于</div>
         <div style="background:var(--surface2);border-radius:12px;border:1px solid var(--border);overflow:hidden;">
-          <div class="profile-row">
+          <div class="profile-row" onclick="openInfoModal('当前版本', 'LinkVault v1.0.0-MVP')">
             <span class="profile-row-icon">ℹ️</span>
             <span class="profile-row-label">当前版本</span>
             <span class="profile-row-value" style="color:var(--text3);font-family:'Space Mono',monospace;font-size:12px;">v1.0.0-MVP</span>
           </div>
           <div class="profile-divider"></div>
-          <div class="profile-row">
+          <div class="profile-row" onclick="openInfoModal('隐私政策', '这里展示隐私政策内容入口，MVP 原型中使用弹窗占位。')">
             <span class="profile-row-icon">📄</span>
             <span class="profile-row-label">隐私政策</span>
             <span class="profile-row-arrow">›</span>
           </div>
           <div class="profile-divider"></div>
-          <div class="profile-row">
+          <div class="profile-row" onclick="openInfoModal('用户协议', '这里展示用户协议内容入口，MVP 原型中使用弹窗占位。')">
             <span class="profile-row-icon">📋</span>
             <span class="profile-row-label">用户协议</span>
             <span class="profile-row-arrow">›</span>
@@ -1017,7 +1173,7 @@
 
       <!-- 退出登录 -->
       <div style="padding:20px 20px 0;">
-        <button class="btn btn-danger" style="width:100%;text-align:center;border-radius:10px;padding:14px;font-size:14px;" onclick="goto('login')">退出登录</button>
+        <button class="btn btn-danger" style="width:100%;text-align:center;border-radius:10px;padding:14px;font-size:14px;" onclick="openLogoutConfirm()">退出登录</button>
       </div>
 
     </div>
@@ -1041,6 +1197,57 @@
     </div>
   </div>
 
+  <!-- global create tag modal -->
+  <div class="confirm-modal-overlay" id="create-tag-modal" onclick="closeCreateTagModal(event)">
+    <div class="confirm-modal" onclick="event.stopPropagation()">
+      <div class="confirm-title">新建标签</div>
+      <div class="confirm-body">标签名同一用户下唯一，最长 20 字。</div>
+      <div style="margin-bottom:14px;">
+        <span class="label">标签名称</span>
+        <input type="text" class="input-field" placeholder="输入新标签名称">
+      </div>
+      <div class="confirm-btns">
+        <button class="btn btn-ghost" onclick="closeCreateTagModal()">取消</button>
+        <button class="btn btn-primary" style="border:none;" onclick="closeCreateTagModal()">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- global clear url confirm -->
+  <div class="confirm-modal-overlay" id="clear-url-confirm" onclick="closeClearUrlConfirm(event)">
+    <div class="confirm-modal" onclick="event.stopPropagation()">
+      <div class="confirm-title">清空链接？</div>
+      <div class="confirm-body">会清空当前输入框中的链接内容。</div>
+      <div class="confirm-btns">
+        <button class="btn btn-ghost" onclick="closeClearUrlConfirm()">取消</button>
+        <button class="btn btn-danger" onclick="closeClearUrlConfirm()">确认清空</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- global logout confirm -->
+  <div class="confirm-modal-overlay" id="logout-confirm" onclick="closeLogoutConfirm(event)">
+    <div class="confirm-modal" onclick="event.stopPropagation()">
+      <div class="confirm-title">退出登录？</div>
+      <div class="confirm-body">退出后会清理本地登录态，需要重新使用手机号验证码登录。</div>
+      <div class="confirm-btns">
+        <button class="btn btn-ghost" onclick="closeLogoutConfirm()">取消</button>
+        <button class="btn btn-danger" onclick="closeLogoutConfirm();goto('login')">确认退出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- global info modal -->
+  <div class="confirm-modal-overlay" id="info-modal" onclick="closeInfoModal(event)">
+    <div class="confirm-modal" onclick="event.stopPropagation()">
+      <div class="confirm-title" id="info-modal-title">提示</div>
+      <div class="confirm-body" id="info-modal-body">操作说明</div>
+      <div class="confirm-btns">
+        <button class="btn btn-primary" id="info-modal-action" style="border:none;" onclick="closeInfoModal()">知道了</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /phone-frame -->
 </div><!-- /phone-wrapper -->
 
@@ -1049,8 +1256,12 @@
 <script>
   let current = 'login';
   let selectedBookmarkId = 1;
-  let selectedTagName = 'AI动态';
+  let selectedTagNames = [];
+  let searchTagNames = ['AI动态'];
+  let tagResultMode = 'all';
   let modalTagName = 'AI动态';
+  let mergeTargetName = '';
+  let infoModalCallback = null;
 
   const tags = [
     { name: 'AI动态', pinned: true },
@@ -1136,11 +1347,10 @@
   };
 
   function goto(id) {
-    if (id === 'tagresult' && !selectedTagName) selectedTagName = 'AI动态';
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('s-' + id).classList.add('active');
-    const map = {login:0,setup:1,home:2,share:3,tags:4,tagresult:5,search:6,detail:7,profile:8};
+    const map = {login:0,setup:1,home:2,share:3,tags:4,tagresult:5,search:6,detail:7,profile:8,'profile-edit':9};
     document.querySelectorAll('.nav-btn')[map[id]].classList.add('active');
     current = id;
     // scroll to top
@@ -1164,7 +1374,7 @@
   }
 
   function formatDateTime(value) {
-    const date = new Date(value);
+    const date = new Date(new Date(value).getTime() + 8 * 60 * 60 * 1000);
     const pad = n => String(n).padStart(2, '0');
     return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
   }
@@ -1175,6 +1385,17 @@
       .sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt))
       .findIndex(item => item.bookmarkId === bookmark.bookmarkId);
     return ['刚刚', '今天', '昨天', '昨天', '2天前'][order] || '更早';
+  }
+
+  function selectAvatar(el) {
+    const picker = el.closest('.avatar-picker');
+    picker.querySelectorAll('.avatar-option').forEach(item => item.classList.remove('selected'));
+    el.classList.add('selected');
+    picker.querySelector('.avatar-circle').textContent = el.textContent;
+  }
+
+  function toggleChipSelected(el) {
+    el.classList.toggle('selected');
   }
 
   function tagCount(name) {
@@ -1193,7 +1414,7 @@
     const note = bookmark.note ? `<div class="link-card-note">💬 ${escapeHtml(bookmark.note)}</div>` : '';
     const tagHtml = bookmark.tags.length
       ? bookmark.tags.map(name => tagChipHtml(name, { small: true })).join('')
-      : '<div class="tag-chip" style="padding:2px 8px;font-size:10px;color:var(--text3);border-color:var(--border);background:transparent;">未打标签</div>';
+      : '<div class="tag-chip" style="padding:2px 8px;font-size:10px;color:var(--text3);border-color:var(--border);background:transparent;" onclick="event.stopPropagation();openUntaggedResult()">未打标签</div>';
 
     return `
       <div class="link-card" onclick="openDetail(${bookmark.bookmarkId})">
@@ -1247,22 +1468,27 @@
   }
 
   function renderTagResult() {
-    const isUntagged = selectedTagName === '__UNTAGGED__';
-    const isAll = selectedTagName === '__ALL__';
-    const result = isAll
-      ? sortedBookmarks()
-      : isUntagged
-        ? sortedBookmarks().filter(bookmark => bookmark.tags.length === 0)
-        : sortedBookmarks().filter(bookmark => bookmark.tags.includes(selectedTagName));
-    document.getElementById('tag-result-name').innerHTML = isAll
-      ? '<span class="tag-emoji">🔖</span>全部收藏'
-      : isUntagged
+    const isUntagged = tagResultMode === 'untagged';
+    const result = isUntagged
+      ? sortedBookmarks().filter(bookmark => bookmark.tags.length === 0)
+      : selectedTagNames.length === 0
+        ? sortedBookmarks()
+        : sortedBookmarks().filter(bookmark => selectedTagNames.every(name => bookmark.tags.includes(name)));
+    const title = isUntagged
       ? '<span class="tag-emoji">📭</span>未打标签'
-      : `<span class="tag-emoji">📌</span>${escapeHtml(selectedTagName)}`;
+      : selectedTagNames.length === 0
+      ? '<span class="tag-emoji">🔖</span>全部收藏'
+      : `<span class="tag-emoji">🏷️</span>${selectedTagNames.map(escapeHtml).join(' + ')}`;
+    document.getElementById('tag-result-name').innerHTML = title;
     document.getElementById('tag-result-count').textContent = `${result.length} 个收藏`;
+    const clearEl = document.getElementById('tag-filter-clear');
+    clearEl.classList.toggle('disabled', !isUntagged && selectedTagNames.length === 0);
+    clearEl.textContent = isUntagged ? '查看全部' : '清除';
     document.getElementById('tag-result-filter-row').innerHTML = sortedTags()
-      .filter(tag => tag.name !== selectedTagName)
-      .map(tag => `<div class="tag-chip" onclick="openTagResult('${escapeHtml(tag.name)}')">+ ${escapeHtml(tag.name)}</div>`)
+      .map(tag => {
+        const selected = !isUntagged && selectedTagNames.includes(tag.name);
+        return `<div class="tag-chip${tag.pinned ? ' pinned' : ''}${selected ? ' selected' : ''}" onclick="toggleTagFilter('${escapeHtml(tag.name)}')">${tag.pinned ? '📌 ' : ''}${selected ? '✓ ' : '+ '}${escapeHtml(tag.name)}</div>`;
+      })
       .join('');
     document.getElementById('tag-result-list').innerHTML = result.length
       ? result.map(linkCardHtml).join('')
@@ -1272,11 +1498,44 @@
   function renderSearch() {
     const keyword = 'AI';
     const result = sortedBookmarks().filter(bookmark =>
-      bookmark.tags.includes('AI动态') &&
+      searchTagNames.every(name => bookmark.tags.includes(name)) &&
       `${bookmark.title} ${bookmark.note} ${bookmark.publisher}`.toLowerCase().includes(keyword.toLowerCase())
     );
-    document.getElementById('search-result-header').innerHTML = `找到 <span class="highlight">${result.length}</span> 条结果（关键词 "${keyword}" · 标签 AI动态）`;
+    document.getElementById('search-active-tags').innerHTML = `${searchTagNames
+      .map(name => `<div class="active-tag" onclick="removeSearchTag('${escapeHtml(name)}')">${escapeHtml(name)} <span class="active-tag-remove">✕</span></div>`)
+      .join('')}<div class="add-search-tag" onclick="openSearchTagModal()">+ 添加标签筛选</div>`;
+    const tagText = searchTagNames.length ? ` · 标签 ${searchTagNames.map(escapeHtml).join(' + ')}` : '';
+    document.getElementById('search-result-header').innerHTML = `找到 <span class="highlight">${result.length}</span> 条结果（关键词 "${keyword}"${tagText}）`;
     document.getElementById('search-result-list').innerHTML = result.map(linkCardHtml).join('');
+  }
+
+  function removeSearchTag(name) {
+    searchTagNames = searchTagNames.filter(item => item !== name);
+    renderSearch();
+  }
+
+  function openSearchTagModal() {
+    document.getElementById('search-tag-picker').innerHTML = sortedTags()
+      .map(tag => {
+        const selected = searchTagNames.includes(tag.name);
+        return `<div class="tag-chip${tag.pinned ? ' pinned' : ''}${selected ? ' selected' : ''}" onclick="toggleSearchTag('${escapeHtml(tag.name)}', this)">${tag.pinned ? '📌 ' : ''}${selected ? '✓ ' : ''}${escapeHtml(tag.name)}</div>`;
+      })
+      .join('');
+    document.getElementById('search-tag-modal').classList.add('open');
+  }
+
+  function toggleSearchTag(name, el) {
+    searchTagNames = searchTagNames.includes(name)
+      ? searchTagNames.filter(item => item !== name)
+      : searchTagNames.concat(name);
+    el.classList.toggle('selected');
+    renderSearch();
+  }
+
+  function closeSearchTagModal(e) {
+    if (!e || e.target === document.getElementById('search-tag-modal')) {
+      document.getElementById('search-tag-modal').classList.remove('open');
+    }
   }
 
   function renderDetail() {
@@ -1288,11 +1547,64 @@
     noteEl.textContent = bookmark.note || '暂无备注';
     noteEl.classList.toggle('empty', !bookmark.note);
     document.getElementById('detail-tags').innerHTML = bookmark.tags.length
-      ? `${bookmark.tags.map(name => tagChipHtml(name)).join('')}<div class="add-tag-chip">＋</div>`
-      : '<div class="tag-chip" style="color:var(--text3);border-color:var(--border);background:transparent;">未打标签</div><div class="add-tag-chip">＋</div>';
+      ? `${bookmark.tags.map(name => tagChipHtml(name)).join('')}<div class="add-tag-chip" onclick="openDetailTagsModal()">＋</div>`
+      : '<div class="tag-chip" style="color:var(--text3);border-color:var(--border);background:transparent;" onclick="openUntaggedResult()">未打标签</div><div class="add-tag-chip" onclick="openDetailTagsModal()">＋</div>';
     document.getElementById('detail-url').textContent = bookmark.originalUrl;
     const openBtn = document.querySelector('.open-link-btn');
     openBtn.onclick = () => window.open(bookmark.originalUrl, '_blank');
+  }
+
+  function currentDetailBookmark() {
+    return bookmarks.find(item => item.bookmarkId === selectedBookmarkId) || bookmarks[0];
+  }
+
+  function openDetailNoteModal() {
+    const bookmark = currentDetailBookmark();
+    document.getElementById('detail-note-input').value = bookmark.note || '';
+    document.getElementById('detail-note-modal').classList.add('open');
+  }
+
+  function closeDetailNoteModal(e) {
+    if (!e || e.target === document.getElementById('detail-note-modal')) {
+      document.getElementById('detail-note-modal').classList.remove('open');
+    }
+  }
+
+  function openDetailTagsModal() {
+    const bookmark = currentDetailBookmark();
+    document.getElementById('detail-tag-picker').innerHTML = sortedTags()
+      .map(tag => {
+        const selected = bookmark.tags.includes(tag.name);
+        return `<div class="tag-chip${tag.pinned ? ' pinned' : ''}${selected ? ' selected' : ''}" onclick="toggleChipSelected(this)">${tag.pinned ? '📌 ' : ''}${selected ? '✓ ' : ''}${escapeHtml(tag.name)}</div>`;
+      })
+      .join('');
+    document.getElementById('detail-tags-modal').classList.add('open');
+  }
+
+  function closeDetailTagsModal(e) {
+    if (!e || e.target === document.getElementById('detail-tags-modal')) {
+      document.getElementById('detail-tags-modal').classList.remove('open');
+    }
+  }
+
+  function openDetailMoreModal() {
+    document.getElementById('detail-more-modal').classList.add('open');
+  }
+
+  function closeDetailMoreModal(e) {
+    if (!e || e.target === document.getElementById('detail-more-modal')) {
+      document.getElementById('detail-more-modal').classList.remove('open');
+    }
+  }
+
+  function openDeleteBookmarkConfirm() {
+    document.getElementById('delete-bookmark-confirm').classList.add('open');
+  }
+
+  function closeDeleteBookmarkConfirm(e) {
+    if (!e || e.target === document.getElementById('delete-bookmark-confirm')) {
+      document.getElementById('delete-bookmark-confirm').classList.remove('open');
+    }
   }
 
   function renderAll() {
@@ -1309,18 +1621,36 @@
   }
 
   function openTagResult(name) {
-    selectedTagName = name;
+    tagResultMode = 'tags';
+    selectedTagNames = [name];
     goto('tagresult');
   }
 
   function openUntaggedResult() {
-    selectedTagName = '__UNTAGGED__';
+    tagResultMode = 'untagged';
+    selectedTagNames = [];
     goto('tagresult');
   }
 
   function openAllResult() {
-    selectedTagName = '__ALL__';
+    tagResultMode = 'all';
+    selectedTagNames = [];
     goto('tagresult');
+  }
+
+  function toggleTagFilter(name) {
+    tagResultMode = 'tags';
+    selectedTagNames = selectedTagNames.includes(name)
+      ? selectedTagNames.filter(item => item !== name)
+      : selectedTagNames.concat(name);
+    if (selectedTagNames.length === 0) tagResultMode = 'all';
+    renderTagResult();
+  }
+
+  function clearTagFilters() {
+    tagResultMode = 'all';
+    selectedTagNames = [];
+    renderTagResult();
   }
 
   function openTagResultFromModal() {
@@ -1328,8 +1658,54 @@
   }
 
   function showAddTagHint() {
-    const h = document.getElementById('add-tag-hint');
-    h.style.display = h.style.display === 'none' ? 'block' : 'none';
+    openCreateTagModal();
+  }
+
+  function openCreateTagModal() {
+    document.getElementById('create-tag-modal').classList.add('open');
+  }
+
+  function closeCreateTagModal(e) {
+    if (!e || e.target === document.getElementById('create-tag-modal')) {
+      document.getElementById('create-tag-modal').classList.remove('open');
+    }
+  }
+
+  function openClearUrlConfirm() {
+    document.getElementById('clear-url-confirm').classList.add('open');
+  }
+
+  function closeClearUrlConfirm(e) {
+    if (!e || e.target === document.getElementById('clear-url-confirm')) {
+      document.getElementById('clear-url-confirm').classList.remove('open');
+    }
+  }
+
+  function openLogoutConfirm() {
+    document.getElementById('logout-confirm').classList.add('open');
+  }
+
+  function closeLogoutConfirm(e) {
+    if (!e || e.target === document.getElementById('logout-confirm')) {
+      document.getElementById('logout-confirm').classList.remove('open');
+    }
+  }
+
+  function openInfoModal(title, body, actionLabel = '知道了', callback = null) {
+    infoModalCallback = callback;
+    document.getElementById('info-modal-title').textContent = title;
+    document.getElementById('info-modal-body').textContent = body;
+    document.getElementById('info-modal-action').textContent = actionLabel;
+    document.getElementById('info-modal').classList.add('open');
+  }
+
+  function closeInfoModal(e) {
+    if (!e || e.target === document.getElementById('info-modal') || e.target === document.getElementById('info-modal-action')) {
+      document.getElementById('info-modal').classList.remove('open');
+      const callback = infoModalCallback;
+      infoModalCallback = null;
+      if (callback) callback();
+    }
   }
 
   function openTagModal(name) {
@@ -1337,7 +1713,6 @@
     const count = tagCount(name);
     document.getElementById('tag-modal-name').textContent = name;
     document.getElementById('tag-modal-count').textContent = `${count} 个收藏`;
-    document.getElementById('merge-confirm-body').textContent = `该标签有 ${count} 个关联收藏，删除前必须将其合并到另一个标签，合并后源标签自动删除。`;
     document.getElementById('tag-modal').classList.add('open');
   }
   function closeTagModal(e) {
@@ -1346,7 +1721,21 @@
     }
   }
 
+  function openRenameConfirm() {
+    document.getElementById('rename-tag-input').value = modalTagName;
+    document.getElementById('rename-confirm').classList.add('open');
+  }
+  function closeRenameConfirm(e) {
+    if (!e || e.target === document.getElementById('rename-confirm')) {
+      document.getElementById('rename-confirm').classList.remove('open');
+    }
+  }
+
   function openDeleteTagModal() {
+    const count = tagCount(modalTagName);
+    document.getElementById('delete-confirm-body').textContent = count === 0
+      ? '该标签暂无关联收藏，可以删除；删除后不可恢复。'
+      : `仅允许删除无关联的标签；当前标签有 ${count} 个关联收藏，需要先合并到其他标签。`;
     document.getElementById('delete-confirm').classList.add('open');
   }
   function closeDeleteConfirm(e) {
@@ -1356,12 +1745,42 @@
   }
 
   function openMergeConfirm() {
+    const options = sortedTags()
+      .filter(tag => tag.name !== modalTagName)
+      .map(tag => `
+        <div class="merge-target-option" onclick="openMergeFinalConfirm('${escapeHtml(tag.name)}')">
+          <span class="merge-target-name">${tag.pinned ? '📌 ' : ''}${escapeHtml(tag.name)}</span>
+          <span class="merge-target-count">${tag.count} 个收藏</span>
+        </div>
+      `)
+      .join('');
+    document.getElementById('merge-confirm-body').textContent = `将“${modalTagName}”合并到下方目标标签，合并后源标签自动删除。`;
+    document.getElementById('merge-target-list').innerHTML = options || '<div class="confirm-body" style="margin-bottom:0;">暂无其他标签可合并</div>';
     document.getElementById('merge-confirm').classList.add('open');
   }
   function closeMergeConfirm(e) {
     if (!e || e.target === document.getElementById('merge-confirm')) {
       document.getElementById('merge-confirm').classList.remove('open');
     }
+  }
+
+  function openMergeFinalConfirm(targetName) {
+    mergeTargetName = targetName;
+    document.getElementById('merge-final-body').textContent = `确认将“${modalTagName}”合并到“${targetName}”？合并后“${modalTagName}”会自动删除。`;
+    document.getElementById('merge-final-confirm').classList.add('open');
+  }
+
+  function closeMergeFinalConfirm(e) {
+    if (!e || e.target === document.getElementById('merge-final-confirm')) {
+      document.getElementById('merge-final-confirm').classList.remove('open');
+      mergeTargetName = '';
+    }
+  }
+
+  function confirmMergeFinal() {
+    document.getElementById('merge-final-confirm').classList.remove('open');
+    document.getElementById('merge-confirm').classList.remove('open');
+    mergeTargetName = '';
   }
 
   renderAll();
