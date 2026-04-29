@@ -642,7 +642,7 @@
         <div class="home-greeting">下午好，风启自航 👋</div>
         <div class="home-title-row">
           <div class="home-title">我的链接库</div>
-          <button class="add-url-btn" onclick="goto('share')">＋ 手动录入</button>
+          <button class="add-url-btn" onclick="goto('share')">＋ 手动导入</button>
         </div>
         <div class="search-bar" onclick="goto('search')">
           <span class="search-icon">🔍</span>
@@ -709,7 +709,7 @@
   <div class="screen" id="s-share">
     <div class="detail-header">
       <div class="back-btn" onclick="goto('home')">←</div>
-      <div class="detail-header-title">手动新增收藏</div>
+      <div class="detail-header-title">手动导入</div>
       <div style="width:28px;"></div>
     </div>
     <div class="scroll-area">
@@ -717,7 +717,7 @@
         <span class="label">粘贴链接</span>
         <textarea class="input-field" rows="3" placeholder="粘贴 Bilibili、YouTube、X、微信公众号等链接">https://b23.tv/DCVvWnI</textarea>
         <div style="display:flex;gap:10px;margin-top:10px;">
-          <button class="btn btn-primary" style="flex:1;padding:10px 16px;" onclick="this.textContent='已解析'">解析链接</button>
+          <button class="btn btn-primary" style="flex:1;padding:10px 16px;" onclick="this.textContent='已保存'">保存链接</button>
           <button class="btn btn-ghost" style="flex:0 0 auto;" onclick="openClearUrlConfirm()">清空</button>
         </div>
       </div>
@@ -985,6 +985,11 @@
           <div class="detail-section-label">原始链接</div>
           <div class="detail-url" id="detail-url">https://b23.tv/DCVvWnI</div>
         </div>
+
+        <div class="detail-section">
+          <div class="detail-section-label">保存时间</div>
+          <div class="detail-url" id="detail-saved-at">2026-04-26 17:10</div>
+        </div>
       </div>
 
       <div class="detail-actions">
@@ -1008,10 +1013,6 @@
         <div class="modal-action" onclick="closeDetailMoreModal();openInfoModal('已复制链接', '原始链接已复制到剪贴板。')">
           <div class="modal-action-icon">🔗</div>
           <div class="modal-action-text">复制原始链接</div>
-        </div>
-        <div class="modal-action" onclick="closeDetailMoreModal();openInfoModal('已发起重试', '元信息状态已重置为 PENDING，后台会重新抓取。')">
-          <div class="modal-action-icon">🔄</div>
-          <div class="modal-action-text">重试元信息抓取</div>
         </div>
         <div class="modal-action danger" onclick="closeDetailMoreModal();openDeleteBookmarkConfirm()">
           <div class="modal-action-icon">🗑️</div>
@@ -1499,7 +1500,7 @@
     const keyword = 'AI';
     const result = sortedBookmarks().filter(bookmark =>
       searchTagNames.every(name => bookmark.tags.includes(name)) &&
-      `${bookmark.title} ${bookmark.note} ${bookmark.publisher}`.toLowerCase().includes(keyword.toLowerCase())
+      `${bookmark.title} ${bookmark.note}`.toLowerCase().includes(keyword.toLowerCase())
     );
     document.getElementById('search-active-tags').innerHTML = `${searchTagNames
       .map(name => `<div class="active-tag" onclick="removeSearchTag('${escapeHtml(name)}')">${escapeHtml(name)} <span class="active-tag-remove">✕</span></div>`)
@@ -1550,6 +1551,7 @@
       ? `${bookmark.tags.map(name => tagChipHtml(name)).join('')}<div class="add-tag-chip" onclick="openDetailTagsModal()">＋</div>`
       : '<div class="tag-chip" style="color:var(--text3);border-color:var(--border);background:transparent;" onclick="openUntaggedResult()">未打标签</div><div class="add-tag-chip" onclick="openDetailTagsModal()">＋</div>';
     document.getElementById('detail-url').textContent = bookmark.originalUrl;
+    document.getElementById('detail-saved-at').textContent = formatDateTime(bookmark.savedAt);
     const openBtn = document.querySelector('.open-link-btn');
     openBtn.onclick = () => window.open(bookmark.originalUrl, '_blank');
   }
