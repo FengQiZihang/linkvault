@@ -9,6 +9,14 @@ USE `linkvault`;
 
 SET NAMES utf8mb4;
 
+CREATE USER IF NOT EXISTS 'linkvault'@'localhost' IDENTIFIED BY '123456';
+ALTER USER 'linkvault'@'localhost' IDENTIFIED BY '123456';
+CREATE USER IF NOT EXISTS 'linkvault'@'127.0.0.1' IDENTIFIED BY '123456';
+ALTER USER 'linkvault'@'127.0.0.1' IDENTIFIED BY '123456';
+GRANT ALL PRIVILEGES ON `linkvault`.* TO 'linkvault'@'localhost';
+GRANT ALL PRIVILEGES ON `linkvault`.* TO 'linkvault'@'127.0.0.1';
+FLUSH PRIVILEGES;
+
 DROP TABLE IF EXISTS `lv_bookmark_tag`;
 DROP TABLE IF EXISTS `lv_tag`;
 DROP TABLE IF EXISTS `lv_bookmark`;
