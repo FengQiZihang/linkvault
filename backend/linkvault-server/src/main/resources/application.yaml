@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: linkvault-server
+
+app:
+  jwt:
+    secret: "linkvault-dev-secret-key-linkvault-dev-secret-key"
+    access-token-expires-in: 604800
