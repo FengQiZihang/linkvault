@@ -262,6 +262,12 @@ mvn spring-boot:run
 
 - 使用 `admin` 做本地数据库管理。
 - 使用 `linkvault` 做项目后端连接账号。
+- 如本地还没有 `linkvault` 账号，先使用管理员账号执行：
+
+```bash
+mysql -uadmin -p < docs/sql/000_local_user.sql
+```
+
 - 如需重建表结构，执行：
 
 ```bash

@@ -1,0 +1,1296 @@
+openapi: 3.0.3
+info:
+  title: LinkVault MVP API
+  version: 1.0.0
+  description: |
+    LinkVault MVP 阶段后端 REST API。
+
+    生成来源：
+    - `/home/hang/workspace/AndroidAPP开发/docs/engineering/接口文档.md`
+
+    用途：
+    - 导入 Apifox
+    - 前后端联调
+    - 后端 Controller/DTO/VO 开发基线
+
+servers:
+  - url: /api/v1
+    description: MVP API base path
+
+tags:
+  - name: Auth
+    description: 鉴权与登录
+  - name: Me
+    description: 当前用户与统计
+  - name: Bookmarks
+    description: 收藏、导入、详情、备注、删除
+  - name: Tags
+    description: 标签管理
+  - name: BookmarkTags
+    description: 收藏标签关系维护
+  - name: Search
+    description: 搜索与筛选
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/sms-code:
+    post:
+      tags: [Auth]
+      summary: 发送短信验证码
+      operationId: sendSmsCode
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsCodeRequest'
+            example:
+              phone: '13800000000'
+      responses:
+        '200':
+          description: 发送成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmsCodeResponse'
+              example:
+                code: 0
+                msg: success
+                data:
+                  expiresIn: 300
+                  cooldownSeconds: 60
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: 手机号验证码登录
+      operationId: loginBySmsCode
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              phone: '13800000000'
+              code: '123456'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSessionResponse'
+              example:
+                code: 0
+                msg: success
+                data:
+                  accessToken: jwt-token
+                  expiresIn: 604800
+                  isNewUser: false
+                  user:
+                    userId: 1
+                    phone: '13800000000'
+                    nickname: 用户0000
+                    avatarUrl: /static/avatars/avatar-01.png
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /me:
+    get:
+      tags: [Me]
+      summary: 获取当前用户
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                code: 0
+                msg: success
+                data:
+                  userId: 1
+                  phone: '13800000000'
+                  nickname: 测试用户
+                  avatarUrl: /static/avatars/avatar-01.png
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Me]
+      summary: 更新当前用户资料
+      operationId: updateCurrentUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCurrentUserRequest'
+            example:
+              nickname: 测试用户
+              avatarUrl: /static/avatars/avatar-03.png
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                code: 0
+                msg: success
+                data:
+                  userId: 1
+                  phone: '13800000000'
+                  nickname: 测试用户
+                  avatarUrl: /static/avatars/avatar-03.png
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /me/stats:
+    get:
+      tags: [Me]
+      summary: 获取当前用户收藏统计
+      description: 返回全部收藏、标签数、未打标签三个数字。
+      operationId: getCurrentUserStats
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLibraryStatsResponse'
+              example:
+                code: 0
+                msg: success
+                data:
+                  totalBookmarkCount: 5
+                  tagCount: 5
+                  untaggedBookmarkCount: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bookmarks/import:
+    post:
+      tags: [Bookmarks]
+      summary: 手动导入 URL
+      description: |
+        只接受单个 `http://` 或 `https://` URL。
+        同一用户重复导入同一链接时返回已有收藏，`duplicated=true`。
+      operationId: importBookmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportBookmarkRequest'
+            example:
+              url: https://b23.tv/DCVvWnI
+      responses:
+        '200':
+          description: 导入成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportBookmarkResponse'
+              example:
+                code: 0
+                msg: success
+                data:
+                  bookmarkId: 1
+                  duplicated: false
+                  link:
+                    originalUrl: https://b23.tv/DCVvWnI
+                    platform: BILIBILI
+                    publisher: 杜雨说AI
+                    title: Claude突然强实名认证，你的号被封了吗？
+                    publishedAt: '2026-04-16T08:12:36.000Z'
+                    metaStatus: SUCCESS
+                  savedAt: '2026-04-21T10:02:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bookmarks:
+    get:
+      tags: [Bookmarks]
+      summary: 获取最近保存收藏列表
+      description: 仅用于首页“最近保存”模块。
+      operationId: listRecentBookmarks
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - name: pageSize
+          in: query
+          description: 首页最近保存默认取 5 条
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 5
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkPageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bookmarks/{bookmarkId}:
+    parameters:
+      - $ref: '#/components/parameters/BookmarkId'
+    get:
+      tags: [Bookmarks]
+      summary: 获取收藏详情
+      operationId: getBookmarkDetail
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkDetailResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Bookmarks]
+      summary: 删除收藏
+      operationId: deleteBookmark
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooleanResponse'
+              example:
+                code: 0
+                msg: success
+                data: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bookmarks/{bookmarkId}/note:
+    put:
+      tags: [Bookmarks]
+      summary: 更新收藏备注
+      operationId: updateBookmarkNote
+      parameters:
+        - $ref: '#/components/parameters/BookmarkId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookmarkNoteRequest'
+            example:
+              note: 这个视频后面要重新看一遍，评估是否适合放进开发流程。
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkNoteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tags:
+    get:
+      tags: [Tags]
+      summary: 获取标签列表
+      operationId: listTags
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Tags]
+      summary: 创建标签
+      operationId: createTag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+            example:
+              name: 自动化
+              pinned: false
+      responses:
+        '200':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tags/{tagId}/name:
+    patch:
+      tags: [Tags]
+      summary: 更新标签名称
+      operationId: renameTag
+      parameters:
+        - $ref: '#/components/parameters/TagId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameTagRequest'
+            example:
+              name: 自动化
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tags/{tagId}/pin:
+    patch:
+      tags: [Tags]
+      summary: 更新标签置顶状态
+      operationId: updateTagPinned
+      parameters:
+        - $ref: '#/components/parameters/TagId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTagPinRequest'
+            example:
+              pinned: true
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tags/{tagId}:
+    delete:
+      tags: [Tags]
+      summary: 删除标签
+      operationId: deleteTag
+      parameters:
+        - $ref: '#/components/parameters/TagId'
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooleanResponse'
+              example:
+                code: 0
+                msg: success
+                data: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tags/{sourceTagId}/merge:
+    post:
+      tags: [Tags]
+      summary: 合并标签
+      operationId: mergeTag
+      parameters:
+        - name: sourceTagId
+          in: path
+          required: true
+          description: 源标签 ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MergeTagRequest'
+            example:
+              targetTagId: 2
+      responses:
+        '200':
+          description: 合并成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooleanResponse'
+              example:
+                code: 0
+                msg: success
+                data: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bookmarks/{bookmarkId}/tags:
+    put:
+      tags: [BookmarkTags]
+      summary: 更新收藏标签
+      operationId: updateBookmarkTags
+      parameters:
+        - $ref: '#/components/parameters/BookmarkId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookmarkTagsRequest'
+            example:
+              tagIds: [1, 2, 5]
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkTagsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bookmarks/{bookmarkId}/organize:
+    put:
+      tags: [BookmarkTags]
+      summary: 导入承接页保存备注和标签
+      operationId: organizeBookmark
+      parameters:
+        - $ref: '#/components/parameters/BookmarkId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizeBookmarkRequest'
+            example:
+              note: 这个内容后面需要复看。
+              tagIds: [1, 5]
+      responses:
+        '200':
+          description: 保存成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizeBookmarkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /bookmarks/search:
+    get:
+      tags: [Search]
+      summary: 搜索/筛选收藏
+      operationId: searchBookmarks
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          description: 标题/备注关键词；不传表示不按关键词过滤
+          schema:
+            type: string
+        - name: tagIds
+          in: query
+          required: false
+          description: 标签 ID 列表，逗号分隔；支持单标签和多标签
+          schema:
+            type: string
+            example: 1,3
+        - name: untagged
+          in: query
+          required: false
+          description: 是否只查未打标签收藏；与 tagIds 互斥
+          schema:
+            type: boolean
+            default: false
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkPageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    BookmarkId:
+      name: bookmarkId
+      in: path
+      required: true
+      description: 收藏 ID
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    TagId:
+      name: tagId
+      in: path
+      required: true
+      description: 标签 ID
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: 页码，从 1 开始
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 20
+      description: 每页数量
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 40001
+            msg: 请求参数错误
+            data: null
+    Unauthorized:
+      description: 未登录或登录态失效
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalidToken:
+              summary: 未登录或 token 无效
+              value:
+                code: 40101
+                msg: 未登录或 token 无效
+                data: null
+            expiredToken:
+              summary: token 已过期
+              value:
+                code: 40102
+                msg: token 已过期
+                data: null
+    Forbidden:
+      description: 无权访问当前资源
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 40301
+            msg: 无权访问当前资源
+            data: null
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 40401
+            msg: 资源不存在
+            data: null
+    Conflict:
+      description: 资源冲突
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 40901
+            msg: 资源冲突
+            data: null
+    TooManyRequests:
+      description: 请求过于频繁
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 42901
+            msg: 请求过于频繁
+            data: null
+    InternalServerError:
+      description: 服务端异常
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 50001
+            msg: 服务端异常
+            data: null
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 40001
+        msg:
+          type: string
+          example: 请求参数错误
+        data:
+          nullable: true
+          example: null
+
+    LinkMetaVO:
+      type: object
+      required: [originalUrl, platform, publisher, title, metaStatus]
+      properties:
+        originalUrl:
+          type: string
+          format: uri
+          description: 当前收藏记录保存的用户原始输入 URL
+        platform:
+          type: string
+          enum: [BILIBILI, YOUTUBE, X, WECHAT_OFFICIAL_ACCOUNT, WEB, UNKNOWN]
+        publisher:
+          type: string
+        title:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        metaStatus:
+          type: string
+          enum: [PENDING, SUCCESS, PARTIAL, FAILED]
+
+    TagSimpleVO:
+      type: object
+      required: [tagId, name, pinned]
+      properties:
+        tagId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        pinned:
+          type: boolean
+
+    TagVO:
+      type: object
+      required: [tagId, name, pinned, bookmarkCount]
+      properties:
+        tagId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        pinned:
+          type: boolean
+        bookmarkCount:
+          type: integer
+          minimum: 0
+
+    UserVO:
+      type: object
+      required: [userId, phone, nickname]
+      properties:
+        userId:
+          type: integer
+          format: int64
+        phone:
+          type: string
+          example: '13800000000'
+        nickname:
+          type: string
+          maxLength: 50
+        avatarUrl:
+          type: string
+          nullable: true
+          example: /static/avatars/avatar-01.png
+
+    AuthSessionVO:
+      type: object
+      required: [accessToken, expiresIn, isNewUser, user]
+      properties:
+        accessToken:
+          type: string
+        expiresIn:
+          type: integer
+          example: 604800
+        isNewUser:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/UserVO'
+
+    BookmarkListItemVO:
+      type: object
+      required: [bookmarkId, title, platform, publisher, note, savedAt, tags]
+      properties:
+        bookmarkId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        platform:
+          type: string
+          enum: [BILIBILI, YOUTUBE, X, WECHAT_OFFICIAL_ACCOUNT, WEB, UNKNOWN]
+        publisher:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          maxLength: 1000
+        savedAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSimpleVO'
+
+    BookmarkDetailVO:
+      type: object
+      required: [bookmarkId, link, note, savedAt, tags]
+      properties:
+        bookmarkId:
+          type: integer
+          format: int64
+        link:
+          $ref: '#/components/schemas/LinkMetaVO'
+        note:
+          type: string
+          maxLength: 1000
+        savedAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSimpleVO'
+
+    BookmarkPageVO:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookmarkListItemVO'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+
+    TagListVO:
+      type: object
+      required: [pinned, normal]
+      properties:
+        pinned:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagVO'
+        normal:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagVO'
+
+    UserLibraryStatsVO:
+      type: object
+      required: [totalBookmarkCount, tagCount, untaggedBookmarkCount]
+      properties:
+        totalBookmarkCount:
+          type: integer
+          minimum: 0
+        tagCount:
+          type: integer
+          minimum: 0
+        untaggedBookmarkCount:
+          type: integer
+          minimum: 0
+
+    SmsCodeRequest:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+          pattern: '^\d{11}$'
+
+    SmsCodeData:
+      type: object
+      required: [expiresIn, cooldownSeconds]
+      properties:
+        expiresIn:
+          type: integer
+          example: 300
+        cooldownSeconds:
+          type: integer
+          example: 60
+
+    LoginRequest:
+      type: object
+      required: [phone, code]
+      properties:
+        phone:
+          type: string
+          pattern: '^\d{11}$'
+        code:
+          type: string
+          pattern: '^\d{6}$'
+
+    UpdateCurrentUserRequest:
+      type: object
+      required: [nickname]
+      properties:
+        nickname:
+          type: string
+          maxLength: 50
+        avatarUrl:
+          type: string
+          nullable: true
+          example: /static/avatars/avatar-03.png
+
+    ImportBookmarkRequest:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+          pattern: '^https?://.*'
+
+    ImportBookmarkData:
+      type: object
+      required: [bookmarkId, duplicated, link, savedAt]
+      properties:
+        bookmarkId:
+          type: integer
+          format: int64
+        duplicated:
+          type: boolean
+        link:
+          $ref: '#/components/schemas/LinkMetaVO'
+        savedAt:
+          type: string
+          format: date-time
+
+    UpdateBookmarkNoteRequest:
+      type: object
+      required: [note]
+      properties:
+        note:
+          type: string
+          maxLength: 1000
+
+    BookmarkNoteData:
+      type: object
+      required: [bookmarkId, note]
+      properties:
+        bookmarkId:
+          type: integer
+          format: int64
+        note:
+          type: string
+          maxLength: 1000
+
+    CreateTagRequest:
+      type: object
+      required: [name, pinned]
+      properties:
+        name:
+          type: string
+          maxLength: 20
+        pinned:
+          type: boolean
+
+    RenameTagRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 20
+
+    UpdateTagPinRequest:
+      type: object
+      required: [pinned]
+      properties:
+        pinned:
+          type: boolean
+
+    MergeTagRequest:
+      type: object
+      required: [targetTagId]
+      properties:
+        targetTagId:
+          type: integer
+          format: int64
+          minimum: 1
+
+    UpdateBookmarkTagsRequest:
+      type: object
+      required: [tagIds]
+      properties:
+        tagIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+            minimum: 1
+
+    BookmarkTagsData:
+      type: object
+      required: [bookmarkId, tags]
+      properties:
+        bookmarkId:
+          type: integer
+          format: int64
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSimpleVO'
+
+    OrganizeBookmarkRequest:
+      type: object
+      required: [note, tagIds]
+      properties:
+        note:
+          type: string
+          maxLength: 1000
+        tagIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+            minimum: 1
+
+    OrganizeBookmarkData:
+      type: object
+      required: [bookmarkId, note, tags]
+      properties:
+        bookmarkId:
+          type: integer
+          format: int64
+        note:
+          type: string
+          maxLength: 1000
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSimpleVO'
+
+    SmsCodeResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/SmsCodeData'
+
+    AuthSessionResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/AuthSessionVO'
+
+    UserResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/UserVO'
+
+    UserLibraryStatsResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/UserLibraryStatsVO'
+
+    ImportBookmarkResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/ImportBookmarkData'
+
+    BookmarkPageResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/BookmarkPageVO'
+
+    BookmarkDetailResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/BookmarkDetailVO'
+
+    BookmarkNoteResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/BookmarkNoteData'
+
+    BooleanResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          type: boolean
+
+    TagListResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/TagListVO'
+
+    TagResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/TagVO'
+
+    BookmarkTagsResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/BookmarkTagsData'
+
+    OrganizeBookmarkResponse:
+      type: object
+      required: [code, msg, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        msg:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/OrganizeBookmarkData'
