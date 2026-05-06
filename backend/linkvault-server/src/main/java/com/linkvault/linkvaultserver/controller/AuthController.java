@@ -7,18 +7,15 @@ import com.linkvault.linkvaultserver.vo.auth.AuthSessionVO;
 import com.linkvault.linkvaultserver.vo.auth.SendSmsCodeResponseVO;
 import com.linkvault.linkvaultserver.service.AuthService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
-
 
     @PostMapping("/sms-code")
     public ApiResponse<SendSmsCodeResponseVO> sendSmsCode(@Valid @RequestBody SendSmsCodeRequest request) {

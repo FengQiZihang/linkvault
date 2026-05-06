@@ -8,6 +8,7 @@ import com.linkvault.linkvaultserver.vo.auth.SendSmsCodeResponseVO;
 import com.linkvault.linkvaultserver.exception.BusinessException;
 import com.linkvault.linkvaultserver.service.AuthService;
 import com.linkvault.linkvaultserver.vo.auth.UserVO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private static final int COOLDOWN_SECONDS = 60;
@@ -24,10 +26,6 @@ public class AuthServiceImpl implements AuthService {
     private static final String DEV_LOGIN_CODE = "123456";
 
     private final JwtTokenProvider jwtTokenProvider;
-
-    public AuthServiceImpl(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
 
 
     private final Map<String, UserVO> userStore = new ConcurrentHashMap<>();
