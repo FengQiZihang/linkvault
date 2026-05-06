@@ -1,5 +1,5 @@
--- LinkVault MVP schema
--- MySQL 8.0
+-- LinkVault MVP 数据库结构
+-- 适用于 MySQL 8.0
 
 CREATE DATABASE IF NOT EXISTS `linkvault`
   DEFAULT CHARACTER SET utf8mb4
@@ -9,13 +9,10 @@ USE `linkvault`;
 
 SET NAMES utf8mb4;
 
-CREATE USER IF NOT EXISTS 'linkvault'@'localhost' IDENTIFIED BY '123456';
-ALTER USER 'linkvault'@'localhost' IDENTIFIED BY '123456';
-CREATE USER IF NOT EXISTS 'linkvault'@'127.0.0.1' IDENTIFIED BY '123456';
-ALTER USER 'linkvault'@'127.0.0.1' IDENTIFIED BY '123456';
-GRANT ALL PRIVILEGES ON `linkvault`.* TO 'linkvault'@'localhost';
-GRANT ALL PRIVILEGES ON `linkvault`.* TO 'linkvault'@'127.0.0.1';
-FLUSH PRIVILEGES;
+-- 本地开发说明：
+-- 本脚本刻意设计为可由已拥有 `linkvault` 库权限的普通业务账号直接执行。
+-- 用户创建和授权已拆分到 `docs/sql/000_local_user.sql`。
+-- 仅在需要初始化本地数据库账号时，才使用管理员账号执行该脚本。
 
 DROP TABLE IF EXISTS `lv_bookmark_tag`;
 DROP TABLE IF EXISTS `lv_tag`;
