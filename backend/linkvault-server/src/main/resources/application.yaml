@@ -2,6 +2,12 @@ spring:
   application:
     name: linkvault-server
 
+  datasource:
+    url: jdbc:mysql://localhost:3306/linkvault?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    username: linkvault
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
 app:
   jwt:
     secret: "linkvault-dev-secret-key-linkvault-dev-secret-key"
