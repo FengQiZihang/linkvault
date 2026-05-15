@@ -22,25 +22,32 @@ bind-address = 127.0.0.1
 bind-address = 0.0.0.0
 ```
 
+如果 Windows 本机已经有 MySQL 占用 `3306` 和 `33060`，WSL 内 MySQL 会启动失败并在 `/var/log/mysql/error.log` 中出现 `Address already in use`。此时本项目本机环境改用：
+
+```text
+port = 3307
+mysqlx-port = 33070
+```
+
 ## 2. 重启 MySQL 并检查监听
 
 执行：
 
 ```bash
 sudo service mysql restart
-sudo ss -lntp | grep 3306
+sudo ss -lntp | grep 3307
 ```
 
 期望看到：
 
 ```text
-0.0.0.0:3306
+0.0.0.0:3307
 ```
 
 不要看到：
 
 ```text
-127.0.0.1:3306
+127.0.0.1:3307
 ```
 
 ## 3. 查询当前 WSL IP
@@ -88,7 +95,7 @@ FLUSH PRIVILEGES;
 应填写：
 
 - Host：WSL IP，例如 `172.23.249.121`
-- Port：`3306`
+- Port：`3307`
 - User：`linkvault`
 - Password：本地约定密码
 - Database：`linkvault`
@@ -98,8 +105,8 @@ FLUSH PRIVILEGES;
 在 WSL 中执行：
 
 ```bash
-mysql -ulinkvault -p -h 127.0.0.1 -P 3306 -e "SELECT USER(), CURRENT_USER();"
-mysql -ulinkvault -p -h 127.0.0.1 -P 3306 -e "USE linkvault; SHOW TABLES;"
+mysql -ulinkvault -p -h 127.0.0.1 -P 3307 -e "SELECT USER(), CURRENT_USER();"
+mysql -ulinkvault -p -h 127.0.0.1 -P 3307 -e "USE linkvault; SHOW TABLES;"
 ```
 
 在 IDEA 连上后执行：
