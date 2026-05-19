@@ -1,3 +1,21 @@
-# Local experimental URL metadata prototype.
+# Local experimental prototype
 /sandbox/url-metadata-prototype/
-示例URL.md
+
+# Local notes and temporary materials
+/docs/prototype/页面截图/
+/docs/个人随便写写
+/期末大作业答辩思路.md
+/MySQL数据库知识.md
+/MySQL 从入门到删库，保姆级教程！傻子可懂.txt
+/示例URL.md
+
+# Build outputs
+/backend/target/
+/backend/linkvault-server/target/
+/frontend/node_modules/
+/frontend/dist/
+
+# Deployment workspace
+/docker/
+
+后端示例项目/

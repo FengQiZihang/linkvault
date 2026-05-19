@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SendSmsCodeResponseVO {
 
-    private Integer expiresIn;
-    private Integer cooldownSeconds;
+    private Integer expiresIn; // 验证码有效期，单位秒
+    private Integer cooldownSeconds; // 再次发送验证码的冷却时间，单位秒
 
 }

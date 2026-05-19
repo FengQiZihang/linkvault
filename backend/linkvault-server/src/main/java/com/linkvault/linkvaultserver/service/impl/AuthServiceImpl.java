@@ -1,11 +1,13 @@
 package com.linkvault.linkvaultserver.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.linkvault.linkvaultserver.common.TimeUtils;
 import com.linkvault.linkvaultserver.component.JwtTokenProvider;
 import com.linkvault.linkvaultserver.context.CurrentUserInfo;
 import com.linkvault.linkvaultserver.context.UserContext;
 import com.linkvault.linkvaultserver.entity.SmsCodeEntity;
 import com.linkvault.linkvaultserver.entity.UserEntity;
+import com.linkvault.linkvaultserver.exception.ErrorCode;
 import com.linkvault.linkvaultserver.mapper.SmsCodeMapper;
 import com.linkvault.linkvaultserver.mapper.UserMapper;
 import com.linkvault.linkvaultserver.vo.auth.AuthSessionVO;
@@ -14,126 +16,209 @@ import com.linkvault.linkvaultserver.exception.BusinessException;
 import com.linkvault.linkvaultserver.service.AuthService;
 import com.linkvault.linkvaultserver.vo.auth.UserVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private static final int COOLDOWN_SECONDS = 60;
-    private static final int EXPIRES_IN_SECONDS = 300;
+    private static final int COOLDOWN_SECONDS = 60; // 同手机号再次发送验证码的冷却秒数
+    private static final int EXPIRES_IN_SECONDS = 300; // 验证码有效期秒数
+    private static final String DEV_SMS_CODE = "123456"; // 开发阶段固定验证码
+    private static final int MAX_FAIL_COUNT = 5; // 单条验证码最大校验失败次数
+    private static final String LOGIN_SCENE = "LOGIN"; // 登录验证码场景标识
+    private static final String DEFAULT_AVATAR_URL = "/static/avatars/avatar-01.png"; // 新用户默认头像路径
+    private static final String ACTIVE_STATUS = "ACTIVE"; // 新用户默认启用状态
 
-    private static final String DEV_LOGIN_CODE = "123456";
-
-    private final JwtTokenProvider jwtTokenProvider;
-    private final UserMapper userMapper;
-    private final SmsCodeMapper smsCodeMapper;
+    private final JwtTokenProvider jwtTokenProvider; // JWT生成组件
+    private final UserMapper userMapper; // 用户表数据访问对象
+    private final SmsCodeMapper smsCodeMapper; // 短信验证码表数据访问对象
 
     @Override
     public SendSmsCodeResponseVO sendSmsCode(String phone) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = TimeUtils.nowUtc();
 
-        SmsCodeEntity latest = smsCodeMapper.selectOne(
-                new LambdaQueryWrapper<SmsCodeEntity>()
-                        .eq(SmsCodeEntity::getPhone, phone)
-                        .eq(SmsCodeEntity::getScene, "LOGIN")
-                        .orderByDesc(SmsCodeEntity::getCreatedAt)
-                        .last("limit 1")
-        );
+        // 1、查询最近一次验证码并校验发送冷却
+        SmsCodeEntity latest = findLatestSmsCode(phone);
+        checkSmsCooldown(latest, now);
 
-        if (latest != null && latest.getCreatedAt() != null
-                && latest.getCreatedAt().plusSeconds(COOLDOWN_SECONDS).isAfter(now)) {
-            throw new BusinessException(429, 42901, "请求过于频繁");
-        }
-
-        SmsCodeEntity smsCode = new SmsCodeEntity();
-        smsCode.setPhone(phone);
-        smsCode.setCode("123456");
-        smsCode.setScene("LOGIN");
-        smsCode.setExpiresAt(now.plusSeconds(EXPIRES_IN_SECONDS));
-        smsCode.setFailCount(0);
-
+        // 2、生成验证码记录并写入数据库
+        SmsCodeEntity smsCode = buildSmsCodeEntity(phone, now);
         smsCodeMapper.insert(smsCode);
+        log.info("短信验证码发送完成，phone={}, smsCodeId={}, expiresAt={}",
+                phone, smsCode.getId(), smsCode.getExpiresAt());
 
+        // 3、返回验证码有效期和再次发送冷却时间
         return new SendSmsCodeResponseVO(EXPIRES_IN_SECONDS, COOLDOWN_SECONDS);
     }
 
-
+    @Transactional(noRollbackFor = BusinessException.class)
     @Override
     public AuthSessionVO login(String phone, String code) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = TimeUtils.nowUtc();
 
-        SmsCodeEntity smsCode = smsCodeMapper.selectOne(
-                new LambdaQueryWrapper<SmsCodeEntity>()
-                        .eq(SmsCodeEntity::getPhone, phone)
-                        .eq(SmsCodeEntity::getScene, "LOGIN")
-                        .isNull(SmsCodeEntity::getUsedAt)
-                        .orderByDesc(SmsCodeEntity::getCreatedAt)
-                        .last("limit 1")
-        );
+        // 1、查询可用验证码并校验
+        SmsCodeEntity smsCode = findLatestAvailableSmsCode(phone);
+        validateSmsCode(smsCode, code, now);
 
-        if (smsCode == null || smsCode.getExpiresAt().isBefore(now) || !smsCode.getCode().equals(code)) {
-            throw new BusinessException(400, 40001, "验证码错误或已失效");
-        }
+        // 2、标记验证码已使用，避免重复登录
+        markSmsCodeUsed(smsCode, now);
 
-        smsCode.setUsedAt(now);
-        smsCodeMapper.updateById(smsCode);
+        // 3、查询用户，未注册则创建新用户，已注册则更新最近登录时间
+        UserEntity existingUser = findUserByPhone(phone);
+        boolean isNewUser = existingUser == null;
+        UserEntity userEntity = saveOrUpdateLoginUser(phone, now, existingUser);
 
-        UserEntity userEntity = userMapper.selectOne(
-                new LambdaQueryWrapper<UserEntity>()
-                        .eq(UserEntity::getPhone, phone)
-                        .last("limit 1")
-        );
-
-        boolean isNewUser = userEntity == null;
-
-        if (userEntity == null) {
-            userEntity = new UserEntity();
-            userEntity.setPhone(phone);
-            userEntity.setNickname("用户" + phone.substring(phone.length() - 4));
-            userEntity.setAvatarUrl("/static/avatars/avatar-01.png");
-            userEntity.setStatus("ACTIVE");
-            userMapper.insert(userEntity);
-        }
-
-        String accessToken = jwtTokenProvider.generateAccessToken(userEntity.getId(), userEntity.getPhone());
-
-        UserVO userVO = new UserVO(
-                userEntity.getId(),
-                userEntity.getPhone(),
-                userEntity.getNickname(),
-                userEntity.getAvatarUrl()
-        );
-
-        return new AuthSessionVO(
-                accessToken,
-                (int) jwtTokenProvider.getAccessTokenExpiresIn(),
-                isNewUser,
-                userVO
-        );
+        // 4、生成登录态并返回给前端
+        AuthSessionVO authSession = buildAuthSession(userEntity, isNewUser);
+        log.info("手机号验证码登录完成，phone={}, userId={}, isNewUser={}",
+                phone, userEntity.getId(), isNewUser);
+        return authSession;
     }
 
 
     @Override
     public UserVO getCurrentUser() {
+        // 1、从请求线程上下文中获取当前登录用户
+        CurrentUserInfo currentUser = getRequiredCurrentUser();
+
+        // 2、根据用户ID查询数据库中的用户信息
+        UserEntity userEntity = getRequiredUserById(currentUser.getUserId());
+
+        // 3、转换为前端需要的用户VO
+        log.info("获取当前用户完成，userId={}, phone={}", userEntity.getId(), userEntity.getPhone());
+        return toUserVO(userEntity);
+    }
+
+    private CurrentUserInfo getRequiredCurrentUser() {
         CurrentUserInfo currentUser = UserContext.getCurrentUser();
         if (currentUser == null) {
-            throw new BusinessException(401, 40101, "未登录或token无效");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
+        return currentUser;
+    }
 
-        UserEntity userEntity = userMapper.selectById(currentUser.getUserId());
+    private UserEntity getRequiredUserById(Long userId) {
+        UserEntity userEntity = userMapper.selectById(userId);
         if (userEntity == null) {
-            throw new BusinessException(401, 40101, "未登录或token无效");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return userEntity;
+    }
+
+    private SmsCodeEntity findLatestSmsCode(String phone) {
+        return smsCodeMapper.selectOne(
+                new LambdaQueryWrapper<SmsCodeEntity>()
+                        .eq(SmsCodeEntity::getPhone, phone)
+                        .eq(SmsCodeEntity::getScene, LOGIN_SCENE)
+                        .orderByDesc(SmsCodeEntity::getCreatedAt)
+                        .last("limit 1")
+        );
+    }
+
+    private SmsCodeEntity findLatestAvailableSmsCode(String phone) {
+        return smsCodeMapper.selectOne(
+                new LambdaQueryWrapper<SmsCodeEntity>()
+                        .eq(SmsCodeEntity::getPhone, phone)
+                        .eq(SmsCodeEntity::getScene, LOGIN_SCENE)
+                        .isNull(SmsCodeEntity::getUsedAt)
+                        .orderByDesc(SmsCodeEntity::getCreatedAt)
+                        .last("limit 1")
+        );
+    }
+
+    private void checkSmsCooldown(SmsCodeEntity latest, LocalDateTime now) {
+        if (latest != null && latest.getCreatedAt() != null
+                && latest.getCreatedAt().plusSeconds(COOLDOWN_SECONDS).isAfter(now)) {
+            throw new BusinessException(ErrorCode.SMS_COOLDOWN);
+        }
+    }
+
+    private SmsCodeEntity buildSmsCodeEntity(String phone, LocalDateTime now) {
+        return SmsCodeEntity.builder()
+                .phone(phone)
+                .code(DEV_SMS_CODE)
+                .scene(LOGIN_SCENE)
+                .expiresAt(now.plusSeconds(EXPIRES_IN_SECONDS))
+                .failCount(0)
+                .build();
+    }
+
+    private void validateSmsCode(SmsCodeEntity smsCode, String code, LocalDateTime now) {
+        if (smsCode == null) {
+            throw new BusinessException(ErrorCode.SMS_INVALID);
         }
 
-        return new UserVO(
-                userEntity.getId(),
-                userEntity.getPhone(),
-                userEntity.getNickname(),
-                userEntity.getAvatarUrl()
+        if (smsCode.getExpiresAt() == null || smsCode.getExpiresAt().isBefore(now)) {
+            throw new BusinessException(ErrorCode.SMS_INVALID);
+        }
+
+        Integer currentFailCount = smsCode.getFailCount() == null ? 0 : smsCode.getFailCount();
+        if (currentFailCount >= MAX_FAIL_COUNT) {
+            throw new BusinessException(ErrorCode.SMS_INVALID);
+        }
+
+        if (!smsCode.getCode().equals(code)) {
+            smsCode.setFailCount(currentFailCount + 1);
+            smsCodeMapper.updateById(smsCode);
+            throw new BusinessException(ErrorCode.SMS_INVALID);
+        }
+    }
+
+    private void markSmsCodeUsed(SmsCodeEntity smsCode, LocalDateTime now) {
+        smsCode.setUsedAt(now);
+        smsCodeMapper.updateById(smsCode);
+    }
+
+    private UserEntity findUserByPhone(String phone) {
+        return userMapper.selectOne(
+                new LambdaQueryWrapper<UserEntity>()
+                        .eq(UserEntity::getPhone, phone)
+                        .last("limit 1")
         );
+    }
+
+    private UserEntity saveOrUpdateLoginUser(String phone, LocalDateTime now, UserEntity existingUser) {
+        if (existingUser == null) {
+            UserEntity newUser = UserEntity.builder()
+                    .phone(phone)
+                    .nickname("用户" + phone.substring(phone.length() - 4))
+                    .avatarUrl(DEFAULT_AVATAR_URL)
+                    .status(ACTIVE_STATUS)
+                    .lastLoginAt(now)
+                    .build();
+            userMapper.insert(newUser);
+            return newUser;
+        }
+
+        existingUser.setLastLoginAt(now);
+        userMapper.updateById(existingUser);
+        return existingUser;
+    }
+
+    private AuthSessionVO buildAuthSession(UserEntity userEntity, boolean isNewUser) {
+        String accessToken = jwtTokenProvider.generateAccessToken(userEntity.getId(), userEntity.getPhone());
+
+        return AuthSessionVO.builder()
+                .accessToken(accessToken)
+                .expiresIn((int) jwtTokenProvider.getAccessTokenExpiresIn())
+                .isNewUser(isNewUser)
+                .user(toUserVO(userEntity))
+                .build();
+    }
+
+    private UserVO toUserVO(UserEntity userEntity) {
+        return UserVO.builder()
+                .userId(userEntity.getId())
+                .phone(userEntity.getPhone())
+                .nickname(userEntity.getNickname())
+                .avatarUrl(userEntity.getAvatarUrl())
+                .build();
     }
 
 }
