@@ -1,18 +1,18 @@
 # LinkVault Agent Guide
 
-本文件是 Codex / AI 后续开发本仓库时的入口约束。实现前先读本文件，再按权威文档顺序查证，不要跳过现有文档直接发明规则。
+本文件是 Codex / AI 后续开发当前后端项目时的入口约束。实现前先读本文件，再按权威文档顺序查证，不要跳过现有文档直接发明规则。
 
 ## 权威文档顺序
 
-1. `docs/REDEM.md`
-2. `docs/engineering/接口文档.md`
-3. `docs/engineering/openapi.yaml`
-4. `docs/engineering/数据库字段设计.md`
-5. `docs/sql/001_schema.sql`
-6. `docs/engineering/技术栈规范与环境基线.md`
-7. `docs/engineering/后端代码风格约定-基于sky-take-out项目.md`
+1. `../../docs/REDEM.md`
+2. `../../docs/engineering/接口文档.md`
+3. `../../docs/engineering/openapi.yaml`
+4. `../../docs/engineering/数据库字段设计.md`
+5. `../../docs/sql/001_schema.sql`
+6. `../../docs/engineering/技术栈规范与环境基线.md`
+7. `../../docs/engineering/后端代码风格约定-基于sky-take-out项目.md`
 
-当文档冲突时，先判断冲突所在层级，再同步修正文档和代码。接口字段、VO、错误码以前端联调文档为准；数据库结构以 `docs/sql/001_schema.sql` 为最终可执行落点。
+当文档冲突时，先判断冲突所在层级，再同步修正文档和代码。接口字段、VO、错误码以前端联调文档为准；数据库结构以 `../../docs/sql/001_schema.sql` 为最终可执行落点。
 
 ## 后端开发规则
 
@@ -28,7 +28,7 @@
 
 - 统一响应使用 `ApiResponse<T>`。
 - 业务异常必须使用 `new BusinessException(ErrorCode.Xxx)`；禁止在业务代码中散落 `40001`、`40101`、`42901` 等数字错误码。
-- 新增错误码必须先更新 `docs/engineering/接口文档.md` 的错误码表，再更新 `ErrorCode` 枚举。
+- 新增错误码必须先更新 `../../docs/engineering/接口文档.md` 的错误码表，再更新 `ErrorCode` 枚举。
 - 分页请求统一使用 `page`、`pageSize`；分页响应统一使用 `PageResponse<T>` 的 `items`、`page`、`pageSize`、`total`。
 - 默认分页参数为 `page=1`、`pageSize=20`；首页最近保存等特殊场景在接口实现中显式设置 `pageSize=5`。
 - Entity 中的 `createdAt`、`updatedAt` 由 MyBatis-Plus `MetaObjectHandler` 自动填充，业务代码不要手动设置。
@@ -48,10 +48,10 @@
 
 ## 接口和文档同步
 
-- 后续功能开发必须按 `docs/engineering/接口文档.md` 的路径、请求、响应、VO、错误码实现。
+- 后续功能开发必须按 `../../docs/engineering/接口文档.md` 的路径、请求、响应、VO、错误码实现。
 - 不接入 Knife4j / Swagger 作为新的接口权威源；当前接口权威仍是 Markdown 文档和 `openapi.yaml`。
 - 如接口实现需要变更请求或响应结构，必须同步更新接口文档和 `openapi.yaml`。
-- 如数据库字段或索引变化，必须同步更新 `docs/engineering/数据库字段设计.md` 和 `docs/sql/001_schema.sql`。
+- 如数据库字段或索引变化，必须同步更新 `../../docs/engineering/数据库字段设计.md` 和 `../../docs/sql/001_schema.sql`。
 
 ## 验证要求
 
