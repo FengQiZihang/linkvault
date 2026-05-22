@@ -368,13 +368,13 @@ AI 的职责：
 
 ```http
 # 全部收藏
-GET /api/v1/bookmarks?page=1&pageSize=20
+GET /api/bookmarks?page=1&pageSize=20
 
 # 单标签筛选
-GET /api/v1/bookmarks?page=1&pageSize=20&tagId=1
+GET /api/bookmarks?page=1&pageSize=20&tagId=1
 
 # 未打标签筛选
-GET /api/v1/bookmarks?page=1&pageSize=20&untagged=true
+GET /api/bookmarks?page=1&pageSize=20&untagged=true
 ```
 
 规则要写清：

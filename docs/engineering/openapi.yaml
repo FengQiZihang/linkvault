@@ -14,8 +14,8 @@ info:
     - 后端 Controller/DTO/VO 开发基线
 
 servers:
-  - url: /api/v1
-    description: MVP API base path
+  - url: http://localhost:8080
+    description: 开发环境
 
 tags:
   - name: Auth
