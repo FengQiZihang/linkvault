@@ -4,7 +4,7 @@
 
 ## 权威文档顺序
 
-1. `../../docs/REDEM.md`
+1. `../../docs/README.md`
 2. `../../docs/engineering/接口文档.md`
 3. `../../docs/engineering/openapi.yaml`
 4. `../../docs/engineering/数据库字段设计.md`
@@ -18,6 +18,7 @@
 
 - 后端工程位于 `backend/linkvault-server`，是 Spring Boot 单模块单体。
 - 分层固定为 `controller -> service -> mapper -> MySQL`，Controller 只接参、记录日志、调用 Service、返回 `ApiResponse`。
+- Controller 的 `@RequestMapping` 只写资源路径，例如 `/auth`、`/me`、`/tags`；不要在后端代码中添加 `/api`，API 代理前缀由前端代理、Apifox 代理或网关 rewrite 处理。
 - Entity 只映射数据库表，DTO 只做请求入参，VO 只做接口出参，禁止把 Entity 直接返回给前端。
 - Service 接口和 `service/impl` 成对出现；`ServiceImpl` 的 public 业务方法使用 `// 1、...`、`// 2、...` 顺序注释展开主流程。
 - 如果某个步骤下代码变多，抽成私有方法；主流程保持一屏内可读。
@@ -55,12 +56,17 @@
 
 ## 验证要求
 
-- 后端代码改动后至少运行：
+- 后端代码改动后至少运行编译与单测：
 
 ```bash
 cd backend/linkvault-server
 mvn test
 ```
 
-- 涉及接口行为时，在最终说明里列出 Apifox 或 curl 验证的接口路径。
+- 涉及接口行为时，继续按 `../../docs/testing/后端接口验证闭环.md` 启动服务并执行 `curl` 接口验证；不能只停在 `mvn test`。
+- 启动服务前必须先按顺序执行 `../../docs/sql/001_schema.sql` 和 `../../docs/sql/002_seed_test_data.sql` 重置本地测试数据。
+- 如果接口验证失败，修复后重新执行 `mvn test -> 重置测试数据 -> 启动服务 -> curl 验证`，直到通过或明确说明阻塞原因。
+- 验证通过后不要清空数据库，保留测试结果供用户用 Apifox 和数据库工具查看。
+- 验证完成后关闭本地后端进程，避免占用 `8080` 端口。
+- 最终说明必须列出实际请求过的接口路径、HTTP 状态码和业务 `code`；Apifox 手工验证点可作为用户复核项，但不能替代 AI 自己执行的 curl 验证。
 - 不要回滚用户已有改动；如果工作区有无关脏文件，只处理当前任务相关文件。
