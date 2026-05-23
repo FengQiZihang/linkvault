@@ -194,6 +194,9 @@ public Result<Employee> getById(@PathVariable Long id) {
 
 - 主流程完整地留在当前方法里
 - 只有当某段逻辑明显可复用时再抽私有方法
+- Service 接口入参优先使用业务变量，不直接把 Controller 的 DTO/请求对象传入 Service。
+- 只有散参数过多、多个方法共享同一组参数，或对象本身已经是明确业务命令时，才考虑封装入参对象。
+- 查询业务方法不加 `@Transactional`；新增、修改、删除、合并等写业务方法都加 `@Transactional`，即使当前只有一次数据库操作。
 
 ### 5.3 DTO 转实体风格
 
@@ -224,16 +227,9 @@ employee.setStatus(StatusConstant.ENABLE);
 
 ### 6.1 简单 SQL
 
-简单查单条、简单插入，偏好直接写在 Mapper 注解里：
+简单单表 CRUD 优先使用 MyBatis-Plus 的通用方法，例如 `selectById`、`selectOne`、`insert`、`updateById`。
 
-- `@Select`
-- `@Insert`
-
-适用场景：
-
-- `getById`
-- `getByUsername`
-- 简单 `insert`
+当 SQL 超过一两行、涉及多表查询、聚合统计、批量迁移或需要清晰表达业务条件时，写到 `resources/mapper/*.xml` 中，Mapper 接口只保留方法签名和 `@Param`。
 
 ### 6.2 动态 SQL 和分页
 

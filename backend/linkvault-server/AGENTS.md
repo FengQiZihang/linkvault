@@ -21,8 +21,10 @@
 - Controller 的 `@RequestMapping` 只写资源路径，例如 `/auth`、`/me`、`/tags`；不要在后端代码中添加 `/api`，API 代理前缀由前端代理、Apifox 代理或网关 rewrite 处理。
 - Entity 只映射数据库表，DTO 只做请求入参，VO 只做接口出参，禁止把 Entity 直接返回给前端。
 - Service 接口和 `service/impl` 成对出现；`ServiceImpl` 的 public 业务方法使用 `// 1、...`、`// 2、...` 顺序注释展开主流程。
+- Service 接口入参优先接收业务变量，不直接接收 DTO/请求对象；只有散参数过多或有明确必要时才封装对象。
+- `@Transactional` 只加在写业务方法上；查询方法不加事务，其余新增、修改、删除、合并等方法即使只有一次数据库操作也要加事务。
 - 如果某个步骤下代码变多，抽成私有方法；主流程保持一屏内可读。
-- 数据库操作优先使用 MyBatis-Plus；复杂动态 SQL 或多表查询再补 XML。
+- 数据库操作优先使用 MyBatis-Plus；多表查询、动态 SQL 或较长 SQL 写到 `src/main/resources/mapper/*.xml`，Mapper 接口保留方法签名和参数注解。
 - 查询当前用户私有数据时必须显式带 `user_id` 条件，不能只凭 `bookmarkId`、`tagId` 查询后再信任结果。
 
 ## 通用代码约束
