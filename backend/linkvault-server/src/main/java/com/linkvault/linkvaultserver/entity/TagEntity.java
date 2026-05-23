@@ -17,21 +17,18 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("lv_user")
-public class UserEntity {
+@TableName("lv_tag")
+public class TagEntity {
 
     @TableId
-    private Long id; // 用户ID
+    private Long id; // 标签ID
 
-    private String phone; // 手机号，登录唯一标识
+    private Long userId; // 所属用户ID
 
-    private String nickname; // 用户昵称
+    private String name; // 标签名称，同一用户下唯一
 
-    private String avatarUrl; // 系统预置头像路径
-
-    private String status; // 用户状态，ACTIVE/DISABLED
-
-    private LocalDateTime lastLoginAt; // 最近登录时间
+    @TableField("is_pinned")
+    private Boolean pinned; // 是否置顶
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt; // 创建时间

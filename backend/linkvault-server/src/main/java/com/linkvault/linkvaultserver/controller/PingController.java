@@ -11,7 +11,7 @@ import java.util.Map;
 @RestController
 public class PingController {
 
-	@GetMapping("/api/v1/ping")
+	@GetMapping("/ping")
     public ApiResponse<Map<String, String>> ping() {
         log.info("健康检查接口调用");
 		return ApiResponse.success(Map.of("message", "pong"));

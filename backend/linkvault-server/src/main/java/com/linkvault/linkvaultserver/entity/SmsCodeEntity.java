@@ -1,6 +1,5 @@
 package com.linkvault.linkvaultserver.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -21,8 +20,8 @@ import java.time.LocalDateTime;
 @TableName("lv_sms_code")
 public class SmsCodeEntity {
 
-    @TableId(type = IdType.AUTO)
-    private Long id; // 验证码记录ID，数据库自增主键
+    @TableId
+    private Long id; // 验证码记录ID
 
     private String phone; // 接收验证码的手机号
 

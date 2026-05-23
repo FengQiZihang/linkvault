@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/me")
 @RequiredArgsConstructor
 public class MeController {
 
     private final AuthService authService; // 当前用户相关业务服务
 
-    @GetMapping("/me")
+    @GetMapping
     public ApiResponse<UserVO> me(@RequestHeader("Authorization") String authorization) {
         log.info("获取当前用户接口调用");
         UserVO user = authService.getCurrentUser();

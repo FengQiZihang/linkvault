@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkvault.linkvaultserver.mapper.TagMapper">
+
+    <select id="selectTagListByUserId" resultType="com.linkvault.linkvaultserver.vo.tag.TagVO">
+        select
+            t.id as tagId,
+            t.name as name,
+            t.is_pinned as pinned,
+            count(bt.id) as bookmarkCount
+        from lv_tag t
+        left join lv_bookmark_tag bt
+            on t.id = bt.tag_id
+            and bt.user_id = #{userId}
+        where t.user_id = #{userId}
+        group by t.id, t.name, t.is_pinned, t.created_at
+        order by
+            t.is_pinned desc,
+            case when t.is_pinned = 1 then t.created_at end asc,
+            case when t.is_pinned = 0 then count(bt.id) end desc,
+            t.created_at asc,
+            t.id asc
+    </select>
+
+    <select id="selectTagVOByUserIdAndTagId" resultType="com.linkvault.linkvaultserver.vo.tag.TagVO">
+        select
+            t.id as tagId,
+            t.name as name,
+            t.is_pinned as pinned,
+            count(bt.id) as bookmarkCount
+        from lv_tag t
+        left join lv_bookmark_tag bt
+            on t.id = bt.tag_id
+            and bt.user_id = #{userId}
+        where t.user_id = #{userId}
+            and t.id = #{tagId}
+        group by t.id, t.name, t.is_pinned
+    </select>
+
+    <update id="updateTagNameByUserId">
+        update lv_tag
+        set name = #{name},
+            updated_at = #{updatedAt}
+        where user_id = #{userId}
+            and id = #{tagId}
+    </update>
+
+    <update id="updateTagPinnedByUserId">
+        update lv_tag
+        set is_pinned = #{pinned},
+            updated_at = #{updatedAt}
+        where user_id = #{userId}
+            and id = #{tagId}
+    </update>
+
+    <select id="countBookmarkTagByUserIdAndTagId" resultType="java.lang.Long">
+        select count(*)
+        from lv_bookmark_tag
+        where user_id = #{userId}
+            and tag_id = #{tagId}
+    </select>
+
+    <insert id="insertMergedBookmarkTags">
+        insert ignore into lv_bookmark_tag
+            (bookmark_id, tag_id, user_id, created_at, updated_at)
+        select
+            bt.bookmark_id,
+            #{targetTagId},
+            #{userId},
+            #{now},
+            #{now}
+        from lv_bookmark_tag bt
+        where bt.user_id = #{userId}
+            and bt.tag_id = #{sourceTagId}
+    </insert>
+
+    <delete id="deleteBookmarkTagsByUserIdAndTagId">
+        delete from lv_bookmark_tag
+        where user_id = #{userId}
+            and tag_id = #{tagId}
+    </delete>
+
+    <delete id="deleteTagByUserId">
+        delete from lv_tag
+        where user_id = #{userId}
+            and id = #{tagId}
+    </delete>
+</mapper>
