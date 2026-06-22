@@ -15,6 +15,13 @@ import com.linkvault.linkvaultserver.vo.auth.SendSmsCodeResponseVO;
 import com.linkvault.linkvaultserver.exception.BusinessException;
 import com.linkvault.linkvaultserver.service.AuthService;
 import com.linkvault.linkvaultserver.vo.auth.UserVO;
+import com.linkvault.linkvaultserver.vo.auth.UserLibraryStatsVO;
+import com.linkvault.linkvaultserver.mapper.BookmarkMapper;
+import com.linkvault.linkvaultserver.mapper.TagMapper;
+import com.linkvault.linkvaultserver.entity.BookmarkEntity;
+import com.linkvault.linkvaultserver.entity.TagEntity;
+
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,10 +41,18 @@ public class AuthServiceImpl implements AuthService {
     private static final String LOGIN_SCENE = "LOGIN"; // 登录验证码场景标识
     private static final String DEFAULT_AVATAR_URL = "/static/avatars/avatar-01.png"; // 新用户默认头像路径
     private static final String ACTIVE_STATUS = "ACTIVE"; // 新用户默认启用状态
+    
+    private static final Set<String> AVATAR_WHITE_LIST = Set.of(
+            "/static/avatars/avatar-01.png", "/static/avatars/avatar-02.png", "/static/avatars/avatar-03.png",
+            "/static/avatars/avatar-04.png", "/static/avatars/avatar-05.png", "/static/avatars/avatar-06.png",
+            "/static/avatars/avatar-07.png", "/static/avatars/avatar-08.png", "/static/avatars/avatar-09.png"
+    );
 
     private final JwtTokenProvider jwtTokenProvider; // JWT生成组件
     private final UserMapper userMapper; // 用户表数据访问对象
     private final SmsCodeMapper smsCodeMapper; // 短信验证码表数据访问对象
+    private final BookmarkMapper bookmarkMapper;
+    private final TagMapper tagMapper;
 
     @Override
     public SendSmsCodeResponseVO sendSmsCode(String phone) {
@@ -221,4 +236,60 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    @Transactional
+    @Override
+    public UserVO updateUserProfile(String nickname, String avatarUrl) {
+        CurrentUserInfo currentUser = getRequiredCurrentUser();
+        
+        if (nickname == null || nickname.trim().isBlank() || nickname.length() > 50) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR);
+        }
+        
+        String normalizedAvatar = avatarUrl;
+        if (avatarUrl != null && !avatarUrl.isBlank()) {
+            if (!AVATAR_WHITE_LIST.contains(avatarUrl)) {
+                throw new BusinessException(ErrorCode.PARAM_ERROR);
+            }
+        } else {
+            normalizedAvatar = DEFAULT_AVATAR_URL;
+        }
+
+        UserEntity user = getRequiredUserById(currentUser.getUserId());
+        user.setNickname(nickname.trim());
+        user.setAvatarUrl(normalizedAvatar);
+        user.setUpdatedAt(TimeUtils.nowUtc());
+        userMapper.updateById(user);
+
+        log.info("更新当前用户资料成功，userId={}, nickname={}, avatarUrl={}", 
+                user.getId(), user.getNickname(), user.getAvatarUrl());
+        return toUserVO(user);
+    }
+
+    @Override
+    public UserLibraryStatsVO getUserLibraryStats() {
+        CurrentUserInfo currentUser = getRequiredCurrentUser();
+        Long userId = currentUser.getUserId();
+
+        Long totalBookmarkCount = bookmarkMapper.selectCount(
+                new LambdaQueryWrapper<BookmarkEntity>()
+                        .eq(BookmarkEntity::getUserId, userId)
+        );
+
+        Long tagCount = tagMapper.selectCount(
+                new LambdaQueryWrapper<TagEntity>()
+                        .eq(TagEntity::getUserId, userId)
+        );
+
+        Long untaggedBookmarkCount = bookmarkMapper.selectCount(
+                new LambdaQueryWrapper<BookmarkEntity>()
+                        .eq(BookmarkEntity::getUserId, userId)
+                        .apply("id NOT IN (select bookmark_id from lv_bookmark_tag where user_id = {0})", userId)
+        );
+
+        return UserLibraryStatsVO.builder()
+                .totalBookmarkCount(totalBookmarkCount)
+                .tagCount(tagCount)
+                .untaggedBookmarkCount(untaggedBookmarkCount)
+                .build();
+    }
 }

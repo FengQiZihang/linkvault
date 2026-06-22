@@ -26,6 +26,9 @@ import com.linkvault.linkvaultserver.vo.bookmark.BookmarkNoteVO;
 import com.linkvault.linkvaultserver.vo.bookmark.ImportBookmarkVO;
 import com.linkvault.linkvaultserver.vo.bookmark.LinkMetaVO;
 import com.linkvault.linkvaultserver.vo.bookmark.TagSimpleVO;
+import com.linkvault.linkvaultserver.vo.bookmark.UpdateBookmarkTagsVO;
+import com.linkvault.linkvaultserver.vo.bookmark.OrganizeBookmarkVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -658,5 +661,182 @@ public class BookmarkServiceImpl implements BookmarkService {
                 .name(tagEntity.getName())
                 .pinned(Boolean.TRUE.equals(tagEntity.getPinned()))
                 .build();
+    }
+
+    @Transactional
+    @Override
+    public UpdateBookmarkTagsVO updateBookmarkTags(Long bookmarkId, List<Long> tagIds) {
+        CurrentUserInfo currentUser = getRequiredCurrentUser();
+        Long normalizedBookmarkId = normalizeBookmarkId(bookmarkId);
+
+        BookmarkEntity bookmark = findBookmarkByUserIdAndBookmarkId(currentUser.getUserId(), normalizedBookmarkId);
+        if (bookmark == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        }
+
+        if (tagIds == null) {
+            tagIds = Collections.emptyList();
+        }
+        
+        List<Long> distinctTagIds = tagIds.stream().distinct().toList();
+        if (!distinctTagIds.isEmpty()) {
+            Long count = tagMapper.selectCount(
+                    new LambdaQueryWrapper<TagEntity>()
+                            .eq(TagEntity::getUserId, currentUser.getUserId())
+                            .in(TagEntity::getId, distinctTagIds)
+            );
+            if (count != distinctTagIds.size()) {
+                throw new BusinessException(ErrorCode.PARAM_ERROR);
+            }
+        }
+
+        bookmarkTagMapper.delete(
+                new LambdaQueryWrapper<BookmarkTagEntity>()
+                        .eq(BookmarkTagEntity::getUserId, currentUser.getUserId())
+                        .eq(BookmarkTagEntity::getBookmarkId, normalizedBookmarkId)
+        );
+
+        for (Long tagId : distinctTagIds) {
+            BookmarkTagEntity relation = BookmarkTagEntity.builder()
+                    .userId(currentUser.getUserId())
+                    .bookmarkId(normalizedBookmarkId)
+                    .tagId(tagId)
+                    .build();
+            bookmarkTagMapper.insert(relation);
+        }
+
+        List<TagSimpleVO> tags = listTagsByBookmarkIds(
+                currentUser.getUserId(), List.of(normalizedBookmarkId))
+                .getOrDefault(normalizedBookmarkId, Collections.emptyList());
+
+        log.info("更新收藏标签完成，userId={}, bookmarkId={}, tagCount={}",
+                currentUser.getUserId(), normalizedBookmarkId, tags.size());
+
+        return UpdateBookmarkTagsVO.builder()
+                .bookmarkId(normalizedBookmarkId)
+                .tags(tags)
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public OrganizeBookmarkVO organizeBookmark(Long bookmarkId, String note, List<Long> tagIds) {
+        CurrentUserInfo currentUser = getRequiredCurrentUser();
+        Long normalizedBookmarkId = normalizeBookmarkId(bookmarkId);
+
+        BookmarkEntity bookmark = findBookmarkByUserIdAndBookmarkId(currentUser.getUserId(), normalizedBookmarkId);
+        if (bookmark == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        }
+
+        String normalizedNote = normalizeNote(note);
+        bookmark.setNote(normalizedNote);
+        bookmark.setUpdatedAt(TimeUtils.nowUtc());
+        bookmarkMapper.updateById(bookmark);
+
+        if (tagIds == null) {
+            tagIds = Collections.emptyList();
+        }
+        
+        List<Long> distinctTagIds = tagIds.stream().distinct().toList();
+        if (!distinctTagIds.isEmpty()) {
+            Long count = tagMapper.selectCount(
+                    new LambdaQueryWrapper<TagEntity>()
+                            .eq(TagEntity::getUserId, currentUser.getUserId())
+                            .in(TagEntity::getId, distinctTagIds)
+            );
+            if (count != distinctTagIds.size()) {
+                throw new BusinessException(ErrorCode.PARAM_ERROR);
+            }
+        }
+
+        bookmarkTagMapper.delete(
+                new LambdaQueryWrapper<BookmarkTagEntity>()
+                        .eq(BookmarkTagEntity::getUserId, currentUser.getUserId())
+                        .eq(BookmarkTagEntity::getBookmarkId, normalizedBookmarkId)
+        );
+
+        for (Long tagId : distinctTagIds) {
+            BookmarkTagEntity relation = BookmarkTagEntity.builder()
+                    .userId(currentUser.getUserId())
+                    .bookmarkId(normalizedBookmarkId)
+                    .tagId(tagId)
+                    .build();
+            bookmarkTagMapper.insert(relation);
+        }
+
+        List<TagSimpleVO> tags = listTagsByBookmarkIds(
+                currentUser.getUserId(), List.of(normalizedBookmarkId))
+                .getOrDefault(normalizedBookmarkId, Collections.emptyList());
+
+        log.info("承接页整理收藏完成，userId={}, bookmarkId={}, noteLength={}, tagCount={}",
+                currentUser.getUserId(), normalizedBookmarkId, normalizedNote.length(), tags.size());
+
+        return OrganizeBookmarkVO.builder()
+                .bookmarkId(normalizedBookmarkId)
+                .note(normalizedNote)
+                .tags(tags)
+                .build();
+    }
+
+    @Override
+    public PageResponse<BookmarkListItemVO> searchBookmarks(String keyword, List<Long> tagIds, Boolean untagged, Integer page, Integer pageSize) {
+        CurrentUserInfo currentUser = getRequiredCurrentUser();
+        Long userId = currentUser.getUserId();
+        
+        boolean isUntagged = Boolean.TRUE.equals(untagged);
+        if (tagIds != null && !tagIds.isEmpty() && isUntagged) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR);
+        }
+
+        Integer normalizedPage = normalizePage(page);
+        Integer normalizedPageSize = normalizePageSize(pageSize, 20);
+
+        List<Long> matchedBookmarkIds = null;
+        if (tagIds != null && !tagIds.isEmpty()) {
+            List<Long> distinctTagIds = tagIds.stream().distinct().toList();
+            List<BookmarkTagEntity> relations = bookmarkTagMapper.selectList(
+                    new LambdaQueryWrapper<BookmarkTagEntity>()
+                            .eq(BookmarkTagEntity::getUserId, userId)
+                            .in(BookmarkTagEntity::getTagId, distinctTagIds)
+            );
+            
+            Map<Long, Long> counts = relations.stream()
+                    .collect(Collectors.groupingBy(BookmarkTagEntity::getBookmarkId, Collectors.counting()));
+            
+            matchedBookmarkIds = counts.entrySet().stream()
+                    .filter(entry -> entry.getValue() == distinctTagIds.size())
+                    .map(Map.Entry::getKey)
+                    .toList();
+            
+            if (matchedBookmarkIds.isEmpty()) {
+                return PageResponse.of(Collections.emptyList(), normalizedPage, normalizedPageSize, 0L);
+            }
+        }
+
+        IPage<BookmarkEntity> bookmarkPage = bookmarkMapper.searchBookmarks(
+                Page.of(normalizedPage, normalizedPageSize),
+                userId,
+                keyword != null ? keyword.trim() : null,
+                matchedBookmarkIds,
+                isUntagged
+        );
+        List<BookmarkEntity> bookmarks = bookmarkPage.getRecords();
+
+        Map<Long, LinkEntity> linkMap = listLinksByBookmarks(bookmarks);
+        Map<Long, List<TagSimpleVO>> tagMap = listTagsByBookmarkIds(
+                userId, bookmarks.stream().map(BookmarkEntity::getId).toList());
+        
+        List<BookmarkListItemVO> items = bookmarks.stream()
+                .map(bookmark -> toBookmarkListItemVO(
+                        bookmark,
+                        getRequiredLink(linkMap, bookmark.getLinkId()),
+                        tagMap.getOrDefault(bookmark.getId(), Collections.emptyList())))
+                .toList();
+
+        log.info("搜索筛选收藏完成，userId={}, keyword={}, tagCount={}, untagged={}, page={}, pageSize={}, total={}",
+                userId, keyword, tagIds != null ? tagIds.size() : 0, isUntagged, normalizedPage, normalizedPageSize, bookmarkPage.getTotal());
+
+        return PageResponse.of(items, normalizedPage, normalizedPageSize, bookmarkPage.getTotal());
     }
 }
