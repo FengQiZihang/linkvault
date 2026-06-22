@@ -24,7 +24,7 @@
 执行目录：
 
 ```bash
-/home/hang/workspace/AndroidAPP开发/sandbox/url-metadata-prototype
+sandbox/url-metadata-prototype
 ```
 
 执行命令：

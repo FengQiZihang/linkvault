@@ -20,7 +20,7 @@
 
 当前实验原型代码目录：
 
-- [sandbox/url-metadata-prototype](/home/hang/workspace/AndroidAPP开发/sandbox/url-metadata-prototype)
+- sandbox/url-metadata-prototype
 
 说明：
 
@@ -52,7 +52,7 @@
 该目录迁入仓库的目的不是纳入版本控制，而是：
 
 - 方便当前项目内后续 AI 直接读取原型代码
-- 避免实验代码继续散落在 `/home/hang/workspace` 根目录
+- 避免实验代码继续散落在开发环境根目录
 - 在进入正式后端工程前保留一份可执行参考实现
 
 ## 4. 平台解析策略

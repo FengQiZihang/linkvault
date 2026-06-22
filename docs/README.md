@@ -119,14 +119,6 @@
 - `后端代码风格约定-基于sky-take-out项目.md`
   - 后端代码风格参考，不直接定义业务
 
-### `docs/environment`
-
-放本地开发环境、工具链和排障记录。
-
-- `WSL开发环境配置记录.md`
-  - 当前 WSL / Java / Maven / MySQL 实测环境记录
-  - 用于复现本地开发环境和排查工具链问题
-  - 不直接定义业务、接口或数据库字段
 
 ### `docs/sql`
 
@@ -175,9 +167,7 @@
   - 汇总后端分层、DTO/VO/Entity、错误码、时间、验证命令等高频规则
 - `项目避坑.md`
   - 当前后端工程实践中的踩坑记录
-  - 例如 Maven 配置、Lombok 使用、IDEA 连接 WSL MySQL、IDEA 启动 JMX 端口问题
-- `IDEA连接WSL内MySQL操作记录.md`
-  - `项目避坑.md` 中 WSL MySQL 连接问题的详细操作记录
+  - 例如 Maven 配置、Lombok 使用规范
 
 这些文件属于后端工程现场记录。若内容变成通用规范，应回填到 `docs/engineering`；若只是本机排障经验，保留在后端目录即可。
 
