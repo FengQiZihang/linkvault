@@ -1,0 +1,98 @@
+{
+	"easycom": {
+		"custom": {
+			"^u-(.*)": "uview-plus/components/u-$1/u-$1.vue"
+		}
+	},
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "LinkVault",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": "登录注册",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white",
+				"disableScroll": true
+			}
+		},
+		{
+			"path": "pages/setup/setup",
+			"style": {
+				"navigationBarTitleText": "完善个人信息",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white",
+				"disableScroll": true
+			}
+		},
+		{
+			"path": "pages/share/share",
+			"style": {
+				"navigationBarTitleText": "手动导入链接",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/tags/tags",
+			"style": {
+				"navigationBarTitleText": "标签管理",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/detail/detail",
+			"style": {
+				"navigationBarTitleText": "链接详情",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/search/search",
+			"style": {
+				"navigationBarTitleText": "高级检索",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/profile/profile",
+			"style": {
+				"navigationBarTitleText": "个人中心",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/tagresult/tagresult",
+			"style": {
+				"navigationBarTitleText": "标签筛选",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/profile-edit/profile-edit",
+			"style": {
+				"navigationBarTitleText": "编辑用户资料",
+				"navigationBarBackgroundColor": "#0e0e11",
+				"navigationBarTextStyle": "white"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "LinkVault",
+		"navigationBarBackgroundColor": "#0e0e11",
+		"backgroundColor": "#0e0e11"
+	}
+}
