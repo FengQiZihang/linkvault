@@ -11,7 +11,7 @@
       <!-- 顶部用户信息展示大卡片 -->
       <view class="user-profile-card">
         <view class="avatar-box">
-          <text class="avatar-char">{{ userStore.userInfo?.avatar || '🦊' }}</text>
+          <image class="avatar-img" :src="userStore.userInfo?.avatarSvg || '/static/avatars/avatar-01.svg'" mode="aspectFit"></image>
         </view>
         <view class="user-details">
           <text class="user-nickname">{{ userStore.userInfo?.nickname || '新用户' }}</text>
@@ -20,11 +20,11 @@
       </view>
 
       <view class="profile-stats-grid">
-        <view class="profile-stat-item">
+        <view class="profile-stat-item" @click="navigateToTagResult('all')">
           <text class="stat-value">{{ bookmarkStore.stats.totalBookmarkCount }}</text>
           <text class="stat-label">全部收藏</text>
         </view>
-        <view class="profile-stat-item">
+        <view class="profile-stat-item" @click="navigateToTags">
           <text class="stat-value">{{ bookmarkStore.stats.tagCount }}</text>
           <text class="stat-label">标签数</text>
         </view>
@@ -39,26 +39,26 @@
         
         <!-- 功能行 1：编辑个人资料（跳回 setup 页面进行编辑） -->
         <view class="setting-item-row" @click="navigateToEditProfile">
-          <text class="item-icon">✏️</text>
+          <u-icon name="edit-pen" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="item-label">编辑个人资料</text>
           <text class="item-value">修改头像/昵称</text>
-          <text class="item-arrow">></text>
+          <u-icon name="arrow-right" size="12" color="#55556a"></u-icon>
         </view>
         
         <!-- 功能行 2：意见反馈 -->
         <view class="setting-item-row" @click="showFeedbackModal = true">
-          <text class="item-icon">💬</text>
+          <u-icon name="chat" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="item-label">意见反馈</text>
           <text class="item-value">提供产品建议</text>
-          <text class="item-arrow">></text>
+          <u-icon name="arrow-right" size="12" color="#55556a"></u-icon>
         </view>
 
         <!-- 功能行 3：关于 LinkVault -->
         <view class="setting-item-row" @click="showAboutModal = true">
-          <text class="item-icon">💡</text>
+          <u-icon name="info-circle" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="item-label">关于 LinkVault</text>
           <text class="item-value">v1.0.0</text>
-          <text class="item-arrow">></text>
+          <u-icon name="arrow-right" size="12" color="#55556a"></u-icon>
         </view>
         
         <!-- 分割线 -->
@@ -66,9 +66,9 @@
         
         <!-- 功能行 4：安全退出登录（独立单行，危险动作红字） -->
         <view class="setting-item-row is-logout-btn" @click="showLogoutConfirm = true">
-          <text class="item-icon danger-color">🚪</text>
+          <u-icon name="error-circle" size="18" color="#f87171" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="item-label danger-color">退出登录</text>
-          <text class="item-arrow danger-color">></text>
+          <u-icon name="arrow-right" size="12" color="#f87171"></u-icon>
         </view>
 
       </view>
@@ -158,6 +158,18 @@ const navigateToEditProfile = () => {
   });
 };
 
+const navigateToTagResult = (mode) => {
+  uni.navigateTo({
+    url: `/pages/tagresult/tagresult?mode=${mode}`
+  });
+};
+
+const navigateToTags = () => {
+  uni.navigateTo({
+    url: '/pages/tags/tags'
+  });
+};
+
 const navigateToUntagged = () => {
   uni.navigateTo({
     url: '/pages/tagresult/tagresult?mode=untagged'
@@ -227,8 +239,10 @@ export default {
     justify-content: center;
     box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
     
-    .avatar-char {
-      font-size: 56rpx;
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
     }
   }
   

@@ -33,7 +33,8 @@
       <!-- 分区 1：置顶标签区块 (若无置顶，则不渲染本区块) -->
       <view v-if="pinnedTags.length > 0" class="tag-group-section">
         <view class="group-header">
-          <text class="group-title">📌 置顶分类标签</text>
+          <u-icon name="pushpin-fill" size="14" color="#fbbf24" customStyle="margin-right: 8rpx;"></u-icon>
+          <text class="group-title">置顶分类标签</text>
         </view>
         <view class="group-list">
           <!-- 渲染置顶标签项 -->
@@ -43,10 +44,10 @@
             class="tag-list-item"
             @click="openActionSheet(tag)"
           >
-            <text class="item-pin-icon">📌</text>
+            <u-icon name="pushpin-fill" size="16" color="#fbbf24" customStyle="margin-right: 12rpx;"></u-icon>
             <text class="item-name">{{ tag.name }}</text>
             <text class="item-count">{{ tag.count }} 个收藏</text>
-            <text class="item-arrow">⚙️</text>
+            <u-icon name="setting" size="16" color="#55556a"></u-icon>
           </view>
         </view>
       </view>
@@ -54,7 +55,8 @@
       <!-- 分区 2：常规标签区块 -->
       <view class="tag-group-section">
         <view class="group-header">
-          <text class="group-title">🏷️ 常规分类标签</text>
+          <u-icon name="tags-fill" size="14" color="#8888a0" customStyle="margin-right: 8rpx;"></u-icon>
+          <text class="group-title">常规分类标签</text>
         </view>
         <view v-if="regularTags.length > 0" class="group-list">
           <!-- 渲染普通标签项 -->
@@ -64,10 +66,10 @@
             class="tag-list-item"
             @click="openActionSheet(tag)"
           >
-            <text class="item-pin-icon">🏷️</text>
+            <u-icon name="tags-fill" size="16" color="#8888a0" customStyle="margin-right: 12rpx;"></u-icon>
             <text class="item-name">{{ tag.name }}</text>
             <text class="item-count">{{ tag.count }} 个收藏</text>
-            <text class="item-arrow">⚙️</text>
+            <u-icon name="setting" size="16" color="#55556a"></u-icon>
           </view>
         </view>
         <!-- 零标签时友好提示 -->
@@ -90,27 +92,27 @@
       <view class="actions-list-container">
         <!-- 动作 1：去首页筛选过滤 -->
         <view class="menu-action-row" @click="handleActionFilter">
-          <text class="action-icon">🔍</text>
+          <u-icon name="search" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="action-text">在首页筛选此标签</text>
         </view>
         <!-- 动作 2：置顶/解置顶 -->
         <view class="menu-action-row" @click="handleActionTogglePin">
-          <text class="action-icon">{{ selectedTag?.pinned ? '📌' : '🏷️' }}</text>
+          <u-icon :name="selectedTag?.pinned ? 'pushpin-fill' : 'tags-fill'" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="action-text">{{ selectedTag?.pinned ? '取消置顶' : '置顶标签' }}</text>
         </view>
         <!-- 动作 3：重命名 -->
         <view class="menu-action-row" @click="handleActionRenameClick">
-          <text class="action-icon">✏️</text>
+          <u-icon name="edit-pen" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="action-text">重命名标签</text>
         </view>
         <!-- 动作 4：数据迁移合并（仅在 count > 0 时有意义） -->
         <view v-if="selectedTag?.count > 0" class="menu-action-row" @click="handleActionMergeClick">
-          <text class="action-icon">🔀</text>
+          <u-icon name="attach" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="action-text">将本标签合并到其他分类</text>
         </view>
         <!-- 动作 5：删除标签（危险红，count > 0 时会触发警告不能删除） -->
         <view class="menu-action-row is-danger" @click="handleActionDeleteClick">
-          <text class="action-icon">🗑️</text>
+          <u-icon name="trash" size="18" color="#f87171" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="action-text">删除标签</text>
         </view>
       </view>
@@ -157,7 +159,7 @@
       :showCancel="false"
       @confirm="showMergeModal = false"
     >
-      <view class="merge-destinations-scroll-wrap">
+      <view class="merge-destinations-scroll-wrap" @touchmove.stop>
         <scroll-view class="merge-scroll" scroll-y="true">
           <view class="destinations-list">
             <!-- 遍历渲染除了当前选定标签外的其他所有可用标签 -->
@@ -167,7 +169,14 @@
               class="dest-item"
               @click="handleMergeSelect(target.name)"
             >
-              <text class="dest-name">{{ target.pinned ? '📌' : '🏷️' }} {{ target.name }}</text>
+              <view class="dest-name-box">
+                <u-icon 
+                  :name="target.pinned ? 'pushpin-fill' : 'tags-fill'" 
+                  size="16" 
+                  :color="target.pinned ? '#fbbf24' : '#8888a0'"
+                ></u-icon>
+                <text class="dest-name">{{ target.name }}</text>
+              </view>
               <text class="dest-count">当前包含 {{ target.count }} 个收藏</text>
             </view>
           </view>
@@ -599,13 +608,17 @@ export default {
 /* 合并目的地列表容器 */
 .merge-destinations-scroll-wrap {
   margin-top: 24rpx;
-  max-height: 480rpx;                    // 限制高度
+  height: 400rpx;                        // 显式指定固定高度，解决 scroll-y 失效
   width: 100%;
+  box-sizing: border-box;
 }
 
 .merge-scroll {
   width: 100%;
   height: 100%;
+  overflow-y: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .destinations-list {
@@ -623,6 +636,12 @@ export default {
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
+    
+    .dest-name-box {
+      display: flex;
+      align-items: center;
+      gap: 12rpx;
+    }
     
     .dest-name {
       font-size: 26rpx;
