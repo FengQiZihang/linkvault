@@ -24,19 +24,19 @@
         <!-- 头像选取展示和九宫格区域 -->
         <view class="avatar-section">
           <view class="avatar-circle">
-            <text class="avatar-char">{{ selectedAvatar }}</text>
+            <image class="avatar-img" :src="selectedAvatarSvg" mode="aspectFit"></image>
           </view>
           <text class="avatar-hint">当前头像</text>
           
-          <!-- 下方预设可选的 Emoji 选项 -->
+          <!-- 下方预设可选的 SVG 角色头像 选项 -->
           <view class="avatar-grid">
             <view 
-              v-for="emoji in avatarOptions" 
-              :key="emoji"
-              :class="['avatar-item', { 'is-active': selectedAvatar === emoji }]"
-              @click="selectedAvatar = emoji"
+              v-for="item in AVATAR_OPTIONS" 
+              :key="item.id"
+              :class="['avatar-item', { 'is-active': selectedAvatarSvg === item.svgUrl }]"
+              @click="selectedAvatarSvg = item.svgUrl"
             >
-              <text class="avatar-item-char">{{ emoji }}</text>
+              <image class="avatar-item-img" :src="item.svgUrl" mode="aspectFit"></image>
             </view>
           </view>
         </view>
@@ -59,7 +59,7 @@
               <u-button
                 type="primary"
                 text="保存修改"
-                :disabled="!nickname.trim() || !selectedAvatar"
+                :disabled="!nickname.trim() || !selectedAvatarSvg"
                 @click="handleSave"
               ></u-button>
             </view>
@@ -81,16 +81,13 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useUserStore } from '@/store/user.js';
+import { useUserStore, AVATAR_OPTIONS, avatarUrlToSvg } from '@/store/user.js';
 
 // 获取用户 Store
 const userStore = useUserStore();
 
-// 可选预置 Emoji
-const avatarOptions = ['🦊', '🌙', '⚡', '🚀', '🎧', '💎', '🌿', '🔥', '⭐'];
-
-// 从 store 中回填现有数据，若缺失则默认选中 🦊 和“新用户”
-const selectedAvatar = ref(userStore.userInfo?.avatar || '🦊');
+// 从 store 中回填现有数据，若缺失则默认选中第 1 个阳光猫
+const selectedAvatarSvg = ref(userStore.userInfo?.avatarSvg || AVATAR_OPTIONS[0].svgUrl);
 const nickname = ref(userStore.userInfo?.nickname || '风启自航');
 
 /**
@@ -98,10 +95,10 @@ const nickname = ref(userStore.userInfo?.nickname || '风启自航');
  */
 const handleSave = async () => {
   const cleanNickname = nickname.value.trim();
-  if (!cleanNickname || !selectedAvatar.value) return;
+  if (!cleanNickname || !selectedAvatarSvg.value) return;
   
   try {
-    await userStore.updateProfile(cleanNickname, selectedAvatar.value);
+    await userStore.updateProfile(cleanNickname, selectedAvatarSvg.value);
     uni.showToast({
       title: '修改成功',
       icon: 'success'
@@ -222,8 +219,10 @@ export default {
     justify-content: center;
     box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.3);
     
-    .avatar-char {
-      font-size: 68rpx;
+    .avatar-img {
+      width: 100rpx;
+      height: 100rpx;
+      border-radius: 50%;
     }
   }
   
@@ -251,6 +250,12 @@ export default {
       justify-content: center;
       transition: all 0.15s ease;
       cursor: pointer;
+      
+      .avatar-item-img {
+        width: 60rpx;
+        height: 60rpx;
+        border-radius: 50%;
+      }
       
       .avatar-item-char {
         font-size: 44rpx;

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Sunny cat avatar">
+  <defs>
+    <linearGradient id="bg" x1="10" y1="10" x2="118" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#FB7185"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#bg)"/>
+  <circle cx="25" cy="26" r="9" fill="#FFF7ED" opacity=".8"/>
+  <circle cx="102" cy="104" r="15" fill="#F97316" opacity=".22"/>
+  <path d="M38 60 31 39l21 9c4-2 8-3 12-3s8 1 12 3l21-9-7 21c5 6 8 13 8 21 0 21-16 34-34 34S30 102 30 81c0-8 3-15 8-21Z" fill="#FFF7ED"/>
+  <path d="M48 77c0-4 3-7 7-7s7 3 7 7M78 77c0-4 3-7 7-7s7 3 7 7" fill="none" stroke="#1F2937" stroke-width="5" stroke-linecap="round"/>
+  <path d="M61 87h6l-3 4-3-4Z" fill="#FB7185"/>
+  <path d="M54 96c4 4 16 4 20 0" fill="none" stroke="#1F2937" stroke-width="4" stroke-linecap="round"/>
+  <path d="M36 83H20M36 91H23M92 83h16M92 91h13" stroke="#F97316" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+</svg>

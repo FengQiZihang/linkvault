@@ -9,21 +9,25 @@
     <!-- 顶部导航 Greeting 区域 -->
     <view class="greeting-header">
       <view class="user-info-row" @click="navigateToProfile">
-        <!-- 动态显示 Emoji 头像 -->
-        <text class="user-avatar">{{ userStore.userInfo?.avatar || '🦊' }}</text>
+        <!-- 动态显示 SVG 角色头像 -->
+        <view class="user-avatar-box">
+          <image class="user-avatar-img" :src="userStore.userInfo?.avatarSvg || '/static/avatars/avatar-01.svg'" mode="aspectFit"></image>
+        </view>
         <view class="user-text">
           <text class="user-welcome">{{ welcomeTimeText }}，</text>
           <text class="user-name">{{ userStore.userInfo?.nickname || '新用户' }}</text>
         </view>
       </view>
       <!-- 右侧前往个人中心小图标 -->
-      <view class="profile-arrow-btn" @click="navigateToProfile">⚙️</view>
+      <view class="profile-arrow-btn" @click="navigateToProfile">
+        <u-icon name="setting" size="20" color="#8888a0"></u-icon>
+      </view>
     </view>
 
     <!-- 搜索条快捷区域（点击直接跳转至搜索页） -->
     <view class="search-section" @click="navigateToSearch">
       <view class="mock-search-bar">
-        <text class="search-icon">🔍</text>
+        <u-icon name="search" size="18" color="#55556a" customStyle="margin-right: 12rpx;"></u-icon>
         <text class="search-placeholder">搜索标题或备注…</text>
       </view>
     </view>
@@ -35,21 +39,21 @@
       <view class="quick-stats-grid">
         <!-- 统计卡片 1：全部收藏 -->
         <view class="stat-card special" @click="navigateToTagResult('all')">
-          <text class="stat-icon">🔖</text>
+          <u-icon name="bookmark" size="26" color="#f59e0b" customStyle="margin-bottom: 8rpx;"></u-icon>
           <text class="stat-label">全部收藏</text>
           <text class="stat-value">{{ bookmarkStore.stats.totalBookmarkCount }}</text>
         </view>
         
         <!-- 统计卡片 2：标签数 -->
         <view class="stat-card" @click="navigateToTags">
-          <text class="stat-icon">🏷️</text>
+          <u-icon name="tags" size="26" color="#f59e0b" customStyle="margin-bottom: 8rpx;"></u-icon>
           <text class="stat-label">标签数</text>
           <text class="stat-value">{{ bookmarkStore.stats.tagCount }}</text>
         </view>
         
         <!-- 统计卡片 3：未打标签 -->
         <view class="stat-card" @click="navigateToTagResult('untagged')">
-          <text class="stat-icon">📭</text>
+          <u-icon name="email" size="26" color="#f59e0b" customStyle="margin-bottom: 8rpx;"></u-icon>
           <text class="stat-label">未打标签</text>
           <text class="stat-value">{{ bookmarkStore.stats.untaggedBookmarkCount }}</text>
         </view>
@@ -268,8 +272,20 @@ export default {
     align-items: center;
     gap: 16rpx;
     
-    .user-avatar {
-      font-size: 48rpx;
+    .user-avatar-box {
+      width: 56rpx;
+      height: 56rpx;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .user-avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
     }
     
     .user-text {

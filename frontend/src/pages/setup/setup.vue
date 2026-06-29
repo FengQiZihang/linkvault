@@ -18,19 +18,19 @@
         <view class="avatar-section">
           <!-- 上方当前选定大头像展示圈 -->
           <view class="avatar-circle">
-            <text class="avatar-char">{{ selectedAvatar }}</text>
+            <image class="avatar-img" :src="selectedAvatarSvg" mode="aspectFit"></image>
           </view>
           <text class="avatar-hint">已选定的头像</text>
           
-          <!-- 下方九宫格预设可选的 Emoji 选项 -->
+          <!-- 下方九宫格预设可选的 SVG 角色头像 选项 -->
           <view class="avatar-grid">
             <view 
-              v-for="emoji in avatarOptions" 
-              :key="emoji"
-              :class="['avatar-item', { 'is-active': selectedAvatar === emoji }]"
-              @click="selectedAvatar = emoji"
+              v-for="item in AVATAR_OPTIONS" 
+              :key="item.id"
+              :class="['avatar-item', { 'is-active': selectedAvatarSvg === item.svgUrl }]"
+              @click="selectedAvatarSvg = item.svgUrl"
             >
-              <text class="avatar-item-char">{{ emoji }}</text>
+              <image class="avatar-item-img" :src="item.svgUrl" mode="aspectFit"></image>
             </view>
           </view>
         </view>
@@ -54,7 +54,7 @@
             <u-button
               type="primary"
               text="进入 LinkVault →"
-              :disabled="!nickname.trim() || !selectedAvatar"
+              :disabled="!nickname.trim() || !selectedAvatarSvg"
               @click="handleSetupComplete"
             ></u-button>
           </view>
@@ -67,16 +67,13 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useUserStore } from '@/store/user.js';
+import { useUserStore, AVATAR_OPTIONS, avatarUrlToSvg } from '@/store/user.js';
 
 // 获取用户 Store
 const userStore = useUserStore();
 
-// 九宫格可选的预设 Emoji 字符头像集
-const avatarOptions = ['🦊', '🌙', '⚡', '🚀', '🎧', '💎', '🌿', '🔥', '⭐'];
-
-// 页面响应式数据绑定，默认取 store 中已有的（若有），或默认选中狐狸 🦊
-const selectedAvatar = ref(userStore.userInfo?.avatar || '🦊');
+// 页面响应式数据绑定，默认取 store 中已有的 SVG（若有），或默认选中第 1 个阳光猫
+const selectedAvatarSvg = ref(userStore.userInfo?.avatarSvg || AVATAR_OPTIONS[0].svgUrl);
 // 昵称初始默认值采用“风启自航”，支持修改
 const nickname = ref(userStore.userInfo?.nickname || '风启自航');
 
@@ -85,11 +82,11 @@ const nickname = ref(userStore.userInfo?.nickname || '风启自航');
  */
 const handleSetupComplete = async () => {
   const cleanNickname = nickname.value.trim();
-  if (!cleanNickname || !selectedAvatar.value) return;
+  if (!cleanNickname || !selectedAvatarSvg.value) return;
   
   try {
     // 1. 调用后端保存昵称与预置头像
-    await userStore.updateProfile(cleanNickname, selectedAvatar.value);
+    await userStore.updateProfile(cleanNickname, selectedAvatarSvg.value);
     
     uni.showToast({
       title: '信息完善成功',
@@ -186,8 +183,10 @@ export default {
     justify-content: center;
     box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.3);
     
-    .avatar-char {
-      font-size: 72rpx;
+    .avatar-img {
+      width: 110rpx;
+      height: 110rpx;
+      border-radius: 50%;
     }
   }
   
@@ -217,8 +216,10 @@ export default {
       transition: all 0.15s ease;
       cursor: pointer;
       
-      .avatar-item-char {
-        font-size: 48rpx;
+      .avatar-item-img {
+        width: 64rpx;
+        height: 64rpx;
+        border-radius: 50%;
       }
       
       /* 点击按压态微缩 */

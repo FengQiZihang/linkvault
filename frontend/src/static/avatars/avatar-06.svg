@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Ocean bird avatar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="20" x2="128" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <path d="M25 77c0-27 17-47 39-47s39 20 39 47c0 24-15 39-39 39S25 101 25 77Z" fill="#F8FAFC"/>
+  <path d="M38 77c0-20 11-34 26-34s26 14 26 34c0 17-10 28-26 28S38 94 38 77Z" fill="#0EA5E9"/>
+  <path d="M53 76h22l-11 12-11-12Z" fill="#F97316"/>
+  <circle cx="52" cy="63" r="5" fill="#0F172A"/>
+  <circle cx="76" cy="63" r="5" fill="#0F172A"/>
+  <path d="M44 45c8-17 32-17 40 0-11-6-29-6-40 0Z" fill="#F8FAFC"/>
+  <path d="M21 97c13 8 29 11 43 11s30-3 43-11" fill="none" stroke="#ECFEFF" stroke-width="6" stroke-linecap="round" opacity=".72"/>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Mint bot avatar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="128" x2="128" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34D399"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#bg)"/>
+  <path d="M64 20v15" stroke="#ECFEFF" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="64" cy="17" r="7" fill="#ECFEFF"/>
+  <rect x="29" y="38" width="70" height="64" rx="20" fill="#F8FAFC"/>
+  <rect x="39" y="52" width="50" height="28" rx="14" fill="#0F172A"/>
+  <circle cx="53" cy="66" r="5" fill="#67E8F9"/>
+  <circle cx="75" cy="66" r="5" fill="#67E8F9"/>
+  <path d="M51 89h26" stroke="#0F172A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M28 64h-9M100 64h9" stroke="#F8FAFC" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="24" cy="100" r="10" fill="#ECFEFF" opacity=".45"/>
+  <circle cx="104" cy="28" r="13" fill="#ECFEFF" opacity=".3"/>
+</svg>

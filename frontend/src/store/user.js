@@ -5,31 +5,35 @@ const USER_KEY = 'linkvault_user_info';
 const PROFILE_REQUIRED_KEY = 'linkvault_profile_required';
 
 export const AVATAR_OPTIONS = [
-  { emoji: '🦊', url: '/static/avatars/avatar-01.png' },
-  { emoji: '🌙', url: '/static/avatars/avatar-02.png' },
-  { emoji: '⚡', url: '/static/avatars/avatar-03.png' },
-  { emoji: '🚀', url: '/static/avatars/avatar-04.png' },
-  { emoji: '🎧', url: '/static/avatars/avatar-05.png' },
-  { emoji: '💎', url: '/static/avatars/avatar-06.png' },
-  { emoji: '🌿', url: '/static/avatars/avatar-07.png' },
-  { emoji: '🔥', url: '/static/avatars/avatar-08.png' },
-  { emoji: '⭐', url: '/static/avatars/avatar-09.png' }
+  { id: 'avatar-01', url: '/static/avatars/avatar-01.png', svgUrl: '/static/avatars/avatar-01.svg', label: '阳光猫' },
+  { id: 'avatar-02', url: '/static/avatars/avatar-02.png', svgUrl: '/static/avatars/avatar-02.svg', label: '薄荷机器人' },
+  { id: 'avatar-03', url: '/static/avatars/avatar-03.png', svgUrl: '/static/avatars/avatar-03.svg', label: '浆果狐' },
+  { id: 'avatar-04', url: '/static/avatars/avatar-04.png', svgUrl: '/static/avatars/avatar-04.svg', label: '丁香熊猫' },
+  { id: 'avatar-05', url: '/static/avatars/avatar-05.png', svgUrl: '/static/avatars/avatar-05.svg', label: '珊瑚兔' },
+  { id: 'avatar-06', url: '/static/avatars/avatar-06.png', svgUrl: '/static/avatars/avatar-06.svg', label: '海洋鸟' },
+  { id: 'avatar-07', url: '/static/avatars/avatar-07.png', svgUrl: '/static/avatars/avatar-07.svg', label: '青柠外星人' },
+  { id: 'avatar-08', url: '/static/avatars/avatar-08.png', svgUrl: '/static/avatars/avatar-08.svg', label: '蜜桃恐龙' },
+  { id: 'avatar-09', url: '/static/avatars/avatar-09.png', svgUrl: '/static/avatars/avatar-09.svg', label: '暗夜忍者' }
 ];
 
-export const avatarUrlToEmoji = (avatarUrl) => {
-  return AVATAR_OPTIONS.find(item => item.url === avatarUrl)?.emoji || '🦊';
+export const avatarUrlToSvg = (avatarUrl) => {
+  if (!avatarUrl) return AVATAR_OPTIONS[0].svgUrl;
+  const found = AVATAR_OPTIONS.find(item => item.url === avatarUrl || item.svgUrl === avatarUrl || item.id === avatarUrl);
+  return found ? found.svgUrl : AVATAR_OPTIONS[0].svgUrl;
 };
 
-export const avatarEmojiToUrl = (emoji) => {
-  return AVATAR_OPTIONS.find(item => item.emoji === emoji)?.url || AVATAR_OPTIONS[0].url;
+export const avatarSvgToUrl = (svgUrlOrId) => {
+  const found = AVATAR_OPTIONS.find(item => item.svgUrl === svgUrlOrId || item.id === svgUrlOrId || item.url === svgUrlOrId);
+  return found ? found.url : AVATAR_OPTIONS[0].url;
 };
 
 const normalizeUser = (user) => {
   if (!user) return null;
+  const svgUrl = avatarUrlToSvg(user.avatarUrl);
   return {
     ...user,
-    avatarUrl: user.avatarUrl || AVATAR_OPTIONS[0].url,
-    avatar: user.avatar || avatarUrlToEmoji(user.avatarUrl)
+    avatarUrl: user.avatarUrl,
+    avatarSvg: svgUrl
   };
 };
 
@@ -98,7 +102,7 @@ export const useUserStore = defineStore('user', {
 
       const updatedUser = await api.updateMe({
         nickname,
-        avatarUrl: avatarEmojiToUrl(avatar)
+        avatarUrl: avatarSvgToUrl(avatar)
       });
       this.persistUser(updatedUser);
       this.persistProfileRequired(false);

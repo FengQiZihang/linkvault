@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Lime alien avatar">
+  <defs>
+    <linearGradient id="bg" x1="14" y1="14" x2="114" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#BEF264"/>
+      <stop offset="1" stop-color="#14B8A6"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="34" fill="url(#bg)"/>
+  <ellipse cx="64" cy="70" rx="39" ry="45" fill="#ECFCCB"/>
+  <path d="M32 55c-8-14-14-26-9-31 7-7 22 7 30 24M96 55c8-14 14-26 9-31-7-7-22 7-30 24" fill="none" stroke="#ECFCCB" stroke-width="9" stroke-linecap="round"/>
+  <ellipse cx="49" cy="65" rx="12" ry="17" fill="#0F172A" transform="rotate(-18 49 65)"/>
+  <ellipse cx="79" cy="65" rx="12" ry="17" fill="#0F172A" transform="rotate(18 79 65)"/>
+  <circle cx="53" cy="61" r="3" fill="#FFFFFF" opacity=".9"/>
+  <circle cx="75" cy="61" r="3" fill="#FFFFFF" opacity=".9"/>
+  <path d="M52 92c7 5 17 5 24 0" fill="none" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="22" cy="101" r="11" fill="#F0FDFA" opacity=".36"/>
+  <circle cx="107" cy="31" r="8" fill="#F0FDFA" opacity=".42"/>
+</svg>
