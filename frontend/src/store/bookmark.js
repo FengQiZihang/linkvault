@@ -2,13 +2,14 @@ import { defineStore } from 'pinia';
 import { api } from '@/api/client.js';
 
 export const PLATFORM_MAP = {
-  BILIBILI: { icon: '📺', label: 'Bilibili' },
-  YOUTUBE: { icon: '▶️', label: 'YouTube' },
-  X: { icon: '𝕏', label: 'X' },
-  WECHAT_OFFICIAL_ACCOUNT: { icon: '💬', label: '微信公众号' },
-  WEB: { icon: '🔗', label: '网页' },
-  UNKNOWN: { icon: '🔗', label: '网页' },
-  OTHER: { icon: '🔗', label: '网页' }
+  BILIBILI: { iconUrl: '/static/platform-icons/bilibili.svg', label: 'Bilibili' },
+  YOUTUBE: { iconUrl: '/static/platform-icons/youtube.svg', label: 'YouTube' },
+  X: { iconUrl: '/static/platform-icons/x.svg', label: 'X' },
+  TWITTER: { iconUrl: '/static/platform-icons/x.svg', label: 'X' },
+  WECHAT_OFFICIAL_ACCOUNT: { iconUrl: '/static/platform-icons/wechat.svg', label: '微信公众号' },
+  WEB: { iconName: 'link', label: '网页' },
+  UNKNOWN: { iconName: 'link', label: '网页' },
+  OTHER: { iconName: 'link', label: '网页' }
 };
 
 const normalizeTag = (tag) => {

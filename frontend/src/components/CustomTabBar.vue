@@ -12,7 +12,12 @@
       :class="{ 'is-active': activeTab === 'home' }"
       @click="handleTabSwitch('home')"
     >
-      <text class="tab-icon">🏠</text>
+      <u-icon 
+        :name="activeTab === 'home' ? 'home-fill' : 'home'" 
+        size="22" 
+        :color="activeTab === 'home' ? '#f59e0b' : '#8888a0'"
+        customStyle="margin-bottom: 4rpx;"
+      ></u-icon>
       <text class="tab-text">首页</text>
     </view>
     
@@ -22,7 +27,12 @@
       :class="{ 'is-active': activeTab === 'search' }"
       @click="handleTabSwitch('search')"
     >
-      <text class="tab-icon">🔍</text>
+      <u-icon 
+        name="search" 
+        size="22" 
+        :color="activeTab === 'search' ? '#f59e0b' : '#8888a0'"
+        customStyle="margin-bottom: 4rpx;"
+      ></u-icon>
       <text class="tab-text">搜索</text>
     </view>
     
@@ -32,7 +42,12 @@
       :class="{ 'is-active': activeTab === 'tags' }"
       @click="handleTabSwitch('tags')"
     >
-      <text class="tab-icon">🏷️</text>
+      <u-icon 
+        :name="activeTab === 'tags' ? 'tags-fill' : 'tags'" 
+        size="22" 
+        :color="activeTab === 'tags' ? '#f59e0b' : '#8888a0'"
+        customStyle="margin-bottom: 4rpx;"
+      ></u-icon>
       <text class="tab-text">标签</text>
     </view>
     
@@ -42,7 +57,12 @@
       :class="{ 'is-active': activeTab === 'profile' }"
       @click="handleTabSwitch('profile')"
     >
-      <text class="tab-icon">👤</text>
+      <u-icon 
+        :name="activeTab === 'profile' ? 'account-fill' : 'account'" 
+        size="22" 
+        :color="activeTab === 'profile' ? '#f59e0b' : '#8888a0'"
+        customStyle="margin-bottom: 4rpx;"
+      ></u-icon>
       <text class="tab-text">我的</text>
     </view>
     

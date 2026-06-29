@@ -19,7 +19,19 @@
     <view class="card-footer">
       <!-- 平台及时间信息 -->
       <view class="meta-info">
-        <text class="platform-icon">{{ platformIcon }}</text>
+        <image
+          v-if="platformMeta.iconUrl"
+          class="platform-icon-img"
+          :src="platformMeta.iconUrl"
+          mode="aspectFit"
+        ></image>
+        <u-icon
+          v-else
+          :name="platformMeta.iconName || 'link'"
+          size="14"
+          color="#8888a0"
+          customStyle="margin-right: 6rpx;"
+        ></u-icon>
         <text class="platform-label">{{ platformLabel }}</text>
         <text class="divider-dot">·</text>
         <text class="time-label">{{ formattedTime }}</text>
@@ -66,19 +78,15 @@ const props = defineProps({
 const emit = defineEmits(['click', 'tag-click']);
 
 /**
- * 属性计算：智能匹配并展示平台所对应的 Emoji 图标
+ * 属性计算：智能匹配平台元信息，品牌平台优先展示本地资产图标。
  */
-const platformIcon = computed(() => {
-  const meta = PLATFORM_MAP[props.bookmark.platform] || PLATFORM_MAP.OTHER;
-  return meta.icon;
-});
+const platformMeta = computed(() => PLATFORM_MAP[props.bookmark.platform] || PLATFORM_MAP.OTHER);
 
 /**
  * 属性计算：智能匹配平台的中文别名
  */
 const platformLabel = computed(() => {
-  const meta = PLATFORM_MAP[props.bookmark.platform] || PLATFORM_MAP.OTHER;
-  return meta.label;
+  return platformMeta.value.label;
 });
 
 /**
@@ -184,9 +192,11 @@ const handleTagTap = (tagName) => {
       font-size: 22rpx;
       color: $uni-text-color-placeholder;
       
-      .platform-icon {
+      .platform-icon-img {
+        width: 28rpx;
+        height: 28rpx;
         margin-right: 6rpx;
-        font-size: 24rpx;
+        border-radius: 6rpx;
       }
       
       .platform-label {

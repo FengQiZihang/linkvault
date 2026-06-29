@@ -14,8 +14,8 @@
     ]"
     @click="handleTap"
   >
-    <!-- 置顶状态下展示 Emoji 别针 📌 -->
-    <text v-if="pinned && showPinIcon" class="pin-icon">📌</text>
+    <!-- 置顶状态下展示 矢量别针图标 -->
+    <u-icon v-if="pinned && showPinIcon" name="pushpin-fill" size="12" color="#fbbf24" customStyle="margin-right: 2rpx;"></u-icon>
     
     <!-- 标签名称 -->
     <text class="tag-name">{{ name }}</text>

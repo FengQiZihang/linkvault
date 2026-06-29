@@ -6,9 +6,11 @@
    -->
   <view class="tag-result-container">
     
-    <!-- 头部自定义导航栏（带返回） -->
+    <!-- 顶部导航行 -->
     <view class="result-header">
-      <view class="back-btn" @click="handleBack">←</view>
+      <view class="back-btn" @click="handleBack">
+        <u-icon name="arrow-left" size="20" color="#e8e8f0"></u-icon>
+      </view>
       <text class="header-title">标签筛选</text>
       <view class="header-placeholder"></view>
     </view>
@@ -16,10 +18,10 @@
     <!-- 顶部状态与过滤操作栏 -->
     <view class="filter-panel-card">
       <view class="title-row">
-        <text class="title-text">
-          <text class="emoji-icon">{{ modeIcon }}</text>
-          {{ filterTitle }}
-        </text>
+        <view class="title-box">
+          <u-icon :name="modeIcon" size="22" color="#f59e0b" customStyle="margin-right: 12rpx;"></u-icon>
+          <text class="title-text">{{ filterTitle }}</text>
+        </view>
       </view>
       <text class="count-text">共 {{ totalCount }} 个收藏</text>
       
@@ -127,12 +129,12 @@ const isUntaggedMode = computed(() => {
 });
 
 /**
- * 属性计算：标题对应的 Emoji 图标
+ * 属性计算：标题对应的 矢量图标名称
  */
 const modeIcon = computed(() => {
-  if (filterMode.value === 'untagged') return '📭';
-  if (activeTags.value.length > 0) return '#️⃣';
-  return '🔖';
+  if (filterMode.value === 'untagged') return 'email';
+  if (activeTags.value.length > 0) return 'grid';
+  return 'bookmark';
 });
 
 /**

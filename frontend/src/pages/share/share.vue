@@ -54,13 +54,27 @@
         <view v-if="stage === 2" class="form-card">
           <!-- 绿色已保存提示 -->
           <view class="saved-badge-row">
-            <view class="saved-badge">✅ 链接已保存</view>
+            <view class="saved-badge">
+              <u-icon name="checkmark-circle-fill" size="16" color="#4ade80" customStyle="margin-right: 8rpx;"></u-icon>
+              <text>链接已保存</text>
+            </view>
           </view>
 
           <!-- 网页元信息解析卡片 -->
           <view v-if="linkMeta" class="link-preview-card">
             <view class="platform-row">
-              <text class="platform-icon">{{ getPlatformMeta(linkMeta.platform).icon }}</text>
+                    <image
+                v-if="getPlatformMeta(linkMeta.platform).iconUrl"
+                class="platform-icon-img"
+                :src="getPlatformMeta(linkMeta.platform).iconUrl"
+                mode="aspectFit"
+              ></image>
+              <u-icon
+                v-else
+                :name="getPlatformMeta(linkMeta.platform).iconName || 'link'"
+                size="16"
+                color="#8888a0"
+              ></u-icon>
               <text class="platform-name">
                 {{ getPlatformMeta(linkMeta.platform).label }}
                 <text v-if="linkMeta.publisher"> · {{ linkMeta.publisher }}</text>
@@ -483,8 +497,10 @@ export default {
     align-items: center;
     gap: 12rpx;
     
-    .platform-icon {
-      font-size: 28rpx;
+    .platform-icon-img {
+      width: 32rpx;
+      height: 32rpx;
+      border-radius: 7rpx;
     }
     
     .platform-name {

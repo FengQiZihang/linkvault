@@ -14,7 +14,21 @@
           
           <!-- 第一行：平台元数据信息 -->
           <view class="platform-row">
-            <text class="platform-badge">{{ platformLabel }}</text>
+            <view class="platform-badge">
+              <image
+                v-if="platformMeta.iconUrl"
+                class="platform-icon-img"
+                :src="platformMeta.iconUrl"
+                mode="aspectFit"
+              ></image>
+              <u-icon
+                v-else
+                :name="platformMeta.iconName || 'link'"
+                size="14"
+                color="#f5f5f7"
+              ></u-icon>
+              <text>{{ platformLabel }}</text>
+            </view>
             <text class="saved-time-text">保存时间：{{ formattedSavedTime }}</text>
           </view>
           
@@ -44,7 +58,10 @@
           <view class="detail-section">
             <view class="section-label-row">
               <text class="section-label">记忆备注 (Note)</text>
-              <text class="edit-link-btn" @click="openEditNoteModal">✏️ 编辑</text>
+              <view class="edit-link-btn" @click="openEditNoteModal">
+                <u-icon name="edit-pen" size="14" color="#f59e0b" customStyle="margin-right: 4rpx;"></u-icon>
+                <text>编辑</text>
+              </view>
             </view>
             <!-- 备注文本，若为空显示暂无备注 -->
             <view 
@@ -88,7 +105,8 @@
           <!-- 动作 1：用外置浏览器查看网址（使用多端条件编译） -->
           <u-button
             type="primary"
-            text="🌟 在外部浏览器打开链接"
+            icon="share-square"
+            text="在外部浏览器打开链接"
             @click="handleOpenBrowser"
           ></u-button>
           
@@ -97,7 +115,8 @@
             <u-button
               type="error"
               :plain="true"
-              text="🗑️ 删除当前收藏"
+              icon="trash"
+              text="删除当前收藏"
               @click="showDeleteConfirm = true"
             ></u-button>
           </view>
@@ -117,17 +136,17 @@
       <view class="actions-list-container">
         <!-- 动作 1：编辑备注 -->
         <view class="menu-action-row" @click="handleActionEditNote">
-          <text class="action-icon">✏️</text>
+          <u-icon name="edit-pen" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="action-text">编辑备注</text>
         </view>
         <!-- 动作 2：调整标签 -->
         <view class="menu-action-row" @click="handleActionAdjustTags">
-          <text class="action-icon">🏷️</text>
+          <u-icon name="tags" size="18" color="#8888a0" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="action-text">调整标签…</text>
         </view>
         <!-- 动作 3：删除当前收藏 -->
         <view class="menu-action-row is-danger" @click="handleActionDelete">
-          <text class="action-icon">🗑️</text>
+          <u-icon name="trash" size="18" color="#f87171" customStyle="margin-right: 16rpx;"></u-icon>
           <text class="action-text">删除当前收藏</text>
         </view>
       </view>
@@ -254,10 +273,13 @@ onLoad(async (query) => {
 /**
  * 属性计算：智能翻译并展示平台标签名
  */
+const platformMeta = computed(() => {
+  if (!bookmark.value) return PLATFORM_MAP.OTHER;
+  return PLATFORM_MAP[bookmark.value.platform] || PLATFORM_MAP.OTHER;
+});
+
 const platformLabel = computed(() => {
-  if (!bookmark.value) return '';
-  const meta = PLATFORM_MAP[bookmark.value.platform] || PLATFORM_MAP.OTHER;
-  return `${meta.icon} ${meta.label}`;
+  return platformMeta.value.label;
 });
 
 /**
@@ -486,6 +508,9 @@ export default {
     margin-bottom: 24rpx;
     
     .platform-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8rpx;
       padding: 6rpx 16rpx;
       background-color: $uni-bg-color-hover; // 中岩灰
       border: 1px solid $uni-border-color;
@@ -493,6 +518,12 @@ export default {
       font-size: 22rpx;
       color: $uni-text-color;
       font-weight: bold;
+
+      .platform-icon-img {
+        width: 28rpx;
+        height: 28rpx;
+        border-radius: 6rpx;
+      }
     }
     
     .saved-time-text {
