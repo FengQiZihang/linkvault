@@ -3,6 +3,7 @@ package com.linkvault.linkvaultserver.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.linkvault.linkvaultserver.common.TimeUtils;
 import com.linkvault.linkvaultserver.component.JwtTokenProvider;
+import com.linkvault.linkvaultserver.config.AliyunSmsProperties;
 import com.linkvault.linkvaultserver.context.CurrentUserInfo;
 import com.linkvault.linkvaultserver.context.UserContext;
 import com.linkvault.linkvaultserver.entity.SmsCodeEntity;
@@ -14,6 +15,7 @@ import com.linkvault.linkvaultserver.vo.auth.AuthSessionVO;
 import com.linkvault.linkvaultserver.vo.auth.SendSmsCodeResponseVO;
 import com.linkvault.linkvaultserver.exception.BusinessException;
 import com.linkvault.linkvaultserver.service.AuthService;
+import com.linkvault.linkvaultserver.service.SmsService;
 import com.linkvault.linkvaultserver.vo.auth.UserVO;
 import com.linkvault.linkvaultserver.vo.auth.UserLibraryStatsVO;
 import com.linkvault.linkvaultserver.mapper.BookmarkMapper;
@@ -21,6 +23,7 @@ import com.linkvault.linkvaultserver.mapper.TagMapper;
 import com.linkvault.linkvaultserver.entity.BookmarkEntity;
 import com.linkvault.linkvaultserver.entity.TagEntity;
 
+import java.security.SecureRandom;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,12 +39,14 @@ public class AuthServiceImpl implements AuthService {
 
     private static final int COOLDOWN_SECONDS = 60; // 同手机号再次发送验证码的冷却秒数
     private static final int EXPIRES_IN_SECONDS = 300; // 验证码有效期秒数
-    private static final String DEV_SMS_CODE = "123456"; // 开发阶段固定验证码
     private static final int MAX_FAIL_COUNT = 5; // 单条验证码最大校验失败次数
     private static final String LOGIN_SCENE = "LOGIN"; // 登录验证码场景标识
     private static final String DEFAULT_AVATAR_URL = "/static/avatars/avatar-01.png"; // 新用户默认头像路径
     private static final String ACTIVE_STATUS = "ACTIVE"; // 新用户默认启用状态
+    private static final String MOCK_SMS_CODE = "123456"; // 本地开发 Mock 固定验证码
     
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     private static final Set<String> AVATAR_WHITE_LIST = Set.of(
             "/static/avatars/avatar-01.png", "/static/avatars/avatar-02.png", "/static/avatars/avatar-03.png",
             "/static/avatars/avatar-04.png", "/static/avatars/avatar-05.png", "/static/avatars/avatar-06.png",
@@ -53,6 +58,8 @@ public class AuthServiceImpl implements AuthService {
     private final SmsCodeMapper smsCodeMapper; // 短信验证码表数据访问对象
     private final BookmarkMapper bookmarkMapper;
     private final TagMapper tagMapper;
+    private final SmsService smsService; // 短信发送服务
+    private final AliyunSmsProperties aliyunSmsProperties; // 阿里云短信属性配置
 
     @Override
     public SendSmsCodeResponseVO sendSmsCode(String phone) {
@@ -62,13 +69,21 @@ public class AuthServiceImpl implements AuthService {
         SmsCodeEntity latest = findLatestSmsCode(phone);
         checkSmsCooldown(latest, now);
 
-        // 2、生成验证码记录并写入数据库
-        SmsCodeEntity smsCode = buildSmsCodeEntity(phone, now);
-        smsCodeMapper.insert(smsCode);
-        log.info("短信验证码发送完成，phone={}, smsCodeId={}, expiresAt={}",
-                phone, smsCode.getId(), smsCode.getExpiresAt());
+        // 2、根据 enabled 开关决定：Mock 模式下使用固定 123456；开启真实下发模式下生成 6 位动态纯数字验证码
+        String code = aliyunSmsProperties.isEnabled() 
+                ? String.format("%06d", RANDOM.nextInt(1000000))
+                : MOCK_SMS_CODE;
 
-        // 3、返回验证码有效期和再次发送冷却时间
+        // 3、生成验证码记录并写入数据库
+        SmsCodeEntity smsCode = buildSmsCodeEntity(phone, code, now);
+        smsCodeMapper.insert(smsCode);
+        log.info("短信验证码生成完成，phone={}, smsCodeId={}, code={}, expiresAt={}",
+                phone, smsCode.getId(), code, smsCode.getExpiresAt());
+
+        // 4、调用短信服务组件进行真实的下发（或Mock模式下下发）
+        smsService.sendSmsCode(phone, code);
+
+        // 5、返回验证码有效期和再次发送冷却时间
         return new SendSmsCodeResponseVO(EXPIRES_IN_SECONDS, COOLDOWN_SECONDS);
     }
 
@@ -154,10 +169,10 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private SmsCodeEntity buildSmsCodeEntity(String phone, LocalDateTime now) {
+    private SmsCodeEntity buildSmsCodeEntity(String phone, String code, LocalDateTime now) {
         return SmsCodeEntity.builder()
                 .phone(phone)
-                .code(DEV_SMS_CODE)
+                .code(code)
                 .scene(LOGIN_SCENE)
                 .expiresAt(now.plusSeconds(EXPIRES_IN_SECONDS))
                 .failCount(0)

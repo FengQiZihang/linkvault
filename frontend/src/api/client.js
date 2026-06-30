@@ -1,9 +1,20 @@
 const TOKEN_KEY = 'linkvault_access_token';
 
 const getDefaultBaseUrl = () => {
-  // H5 development uses the Vite proxy configured in vite.config.js.
-  // App/native builds can override this with VITE_API_BASE_URL.
-  return import.meta.env?.VITE_API_BASE_URL || '/api';
+  // 1. 如果配置了环境变量 VITE_API_BASE_URL，则优先使用
+  if (import.meta.env?.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+
+  // 2. 本地日常测试：在 H5 浏览器开发环境下，返回 '/api'，使用 Vite 代理转发到本地 localhost:8080
+  // #ifdef H5
+  if (process.env.NODE_ENV === 'development') {
+    return '/api';
+  }
+  // #endif
+
+  // 3. 手机云打包部署或真机测试：直接使用 CF 内网穿透域名访问本地后端
+  return 'https://lv.fengqizihang.me';
 };
 
 export const API_BASE_URL = getDefaultBaseUrl();

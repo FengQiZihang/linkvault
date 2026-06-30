@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkVault 项目答辩演示 Slide</title>
+  <!-- 引入高级现代字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       设计系统 - 暗岩与琥珀 (Dark Rock & Warm Amber)
+       ========================================================================== */
+    :root {
+      --bg-dark-rock: #0e0f12;       /* 深暗岩石背景 */
+      --bg-card: #16181f;            /* 卡片背景 */
+      --bg-card-hover: #1d212c;      /* 悬浮卡片背景 */
+      --color-amber-primary: #f59e0b; /* 琥珀金主色 */
+      --color-amber-dark: #b45309;    /* 深琥珀金 */
+      --color-amber-light: #fef3c7;   /* 淡琥珀金 */
+      --text-white: #f3f4f6;         /* 白灰色主字 */
+      --text-gray: #9ca3af;          /* 灰色辅助字 */
+      --border-amber: rgba(245, 158, 11, 0.15); /* 琥珀色半透明边框 */
+      --shadow-amber: rgba(245, 158, 11, 0.08);  /* 琥珀色阴影 */
+      
+      --font-main: 'Inter', 'Noto Sans SC', sans-serif;
+      --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark-rock);
+      color: var(--text-white);
+      font-family: var(--font-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* 动态微粒背景效果 */
+    .bg-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0) 70%);
+      animation: float 25s infinite linear;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0) scale(1); opacity: 0; }
+      50% { opacity: 0.8; }
+      100% { transform: translateY(-20vh) translateX(100px) scale(1.5); opacity: 0; }
+    }
+
+    /* ==========================================================================
+       幻灯片容器与过渡动画
+       ========================================================================== */
+    .slides-container {
+      flex: 1;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.97) translateY(10px);
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 6rem;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    .slide-content {
+      width: 100%;
+      max-width: 1250px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       通用排版与元素样式
+       ========================================================================== */
+    h1.slide-title {
+      font-size: 2.6rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--text-white);
+      position: relative;
+      display: inline-block;
+    }
+
+    h1.slide-title span {
+      color: var(--color-amber-primary);
+    }
+
+    h1.slide-title::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--color-amber-primary), transparent);
+      border-radius: 2px;
+    }
+
+    p.subtitle {
+      font-size: 1.05rem;
+      color: var(--text-gray);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    /* 布局网格 */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-amber);
+      border-radius: 12px;
+      padding: 1.8rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+      transition: var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--color-amber-primary), transparent);
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .card:hover {
+      background-color: var(--bg-card-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 15px 30px rgba(245, 158, 11, 0.08), 0 5px 15px rgba(0,0,0,0.6);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: var(--color-amber-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .card-text {
+      font-size: 0.95rem;
+      color: var(--text-gray);
+      line-height: 1.6;
+    }
+
+    .highlight-text {
+      color: var(--color-amber-primary);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       Slide 1: 封面样式
+       ========================================================================== */
+    .slide-cover {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-container {
+      position: relative;
+      margin-bottom: 1rem;
+      animation: pulse 3s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.2)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.35)); }
+    }
+
+    .logo-icon {
+      width: 70px;
+      height: 70px;
+      fill: none;
+      stroke: var(--color-amber-primary);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .cover-title {
+      font-size: 4rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 0.8rem;
+      background: linear-gradient(135deg, #ffffff 60%, var(--color-amber-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-subtitle {
+      font-size: 1.4rem;
+      color: var(--text-gray);
+      max-width: 600px;
+      margin-bottom: 3rem;
+      font-weight: 300;
+    }
+
+    .cover-meta {
+      display: flex;
+      gap: 2.5rem;
+      font-size: 0.95rem;
+      color: var(--text-gray);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1.5rem;
+    }
+
+    .cover-meta-item strong {
+      color: var(--color-amber-primary);
+    }
+
+    /* ==========================================================================
+       Slide 2: 痛点与需求背景
+       ========================================================================== */
+    .pain-vs-solution {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .pain-box {
+      border-left: 4px solid #ef4444;
+    }
+
+    .solution-box {
+      border-left: 4px solid var(--color-amber-primary);
+    }
+
+    .vs-divider {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-gray);
+      background-color: rgba(255,255,255,0.03);
+      border-radius: 50%;
+      width: 55px;
+      height: 55px;
+      margin: 0 auto;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* ==========================================================================
+       Slide 3: 系统完整技术栈
+       ========================================================================== */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .tech-section {
+      background-color: rgba(22, 24, 31, 0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .tech-section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--color-amber-primary);
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+      padding-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .tech-list {
+      list-style: none;
+    }
+
+    .tech-list li {
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+      color: var(--text-white);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .tech-list li::before {
+      content: '■';
+      color: var(--color-amber-primary);
+      font-size: 0.7rem;
+      margin-top: 0.25rem;
+    }
+
+    .tech-list li span {
+      color: var(--text-gray);
+    }
+
+    /* ==========================================================================
+       Slide 4: 研发流步骤 (AI 辅助实践)
+       ========================================================================== */
+    .workflow-steps {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .workflow-steps::after {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-amber-primary), rgba(255,255,255,0.1));
+      z-index: 1;
+    }
+
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 20%;
+      z-index: 2;
+    }
+
+    .step-num {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--bg-card);
+      border: 2px solid var(--color-amber-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-amber-primary);
+      margin-bottom: 1.2rem;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+      transition: var(--transition-smooth);
+    }
+
+    .step-item:hover .step-num {
+      background-color: var(--color-amber-primary);
+      color: var(--bg-dark-rock);
+      transform: scale(1.1);
+    }
+
+    .step-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-gray);
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       Slide 5: 项目亮点 (技术亮点 & 功能亮点)
+       ========================================================================== */
+    .highlights-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .highlight-group {
+      background-color: rgba(22, 24, 31, 0.7);
+      border: 1px solid var(--border-amber);
+      border-radius: 12px;
+      padding: 1.8rem;
+    }
+
+    .highlight-group-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 0.6rem;
+    }
+
+    .highlight-item {
+      margin-bottom: 1.2rem;
+    }
+
+    .highlight-item-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-amber-primary);
+      margin-bottom: 0.3rem;
+    }
+
+    .highlight-item-desc {
+      font-size: 0.85rem;
+      color: var(--text-gray);
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       Slide 6: 业务演示流程
+       ========================================================================== */
+    .demo-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .demo-card {
+      text-align: center;
+      padding: 2.2rem 1.3rem;
+    }
+
+    .demo-icon-wrapper {
+      width: 55px;
+      height: 55px;
+      background-color: rgba(245, 158, 11, 0.08);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem auto;
+      border: 1px solid var(--border-amber);
+    }
+
+    .demo-icon {
+      width: 25px;
+      height: 25px;
+      stroke: var(--color-amber-primary);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    /* ==========================================================================
+       页脚与控制栏
+       ========================================================================== */
+    footer.controls-bar {
+      height: 70px;
+      background-color: rgba(14, 15, 18, 0.85);
+      border-top: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4rem;
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-white);
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: var(--font-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition-smooth);
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background-color: var(--color-amber-primary);
+      color: var(--bg-dark-rock);
+      border-color: var(--color-amber-primary);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 0.8rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .dot.active {
+      background-color: var(--color-amber-primary);
+      transform: scale(1.3);
+      box-shadow: 0 0 8px var(--color-amber-primary);
+    }
+
+    .slide-number {
+      font-size: 0.9rem;
+      color: var(--text-gray);
+    }
+
+    /* 快捷键提示 */
+    .keyboard-tip {
+      position: absolute;
+      bottom: 85px;
+      right: 4rem;
+      background-color: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: var(--text-gray);
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .key-badge {
+      background-color: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      color: var(--text-white);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 动态粒子背景 -->
+  <div class="bg-particles" id="js-particles"></div>
+
+  <!-- 幻灯片主体容器 -->
+  <main class="slides-container" id="js-slides-container">
+    
+    <!-- ==========================================
+         Slide 1: 封面
+         ========================================== -->
+    <section class="slide active" id="slide-1">
+      <div class="slide-content slide-cover">
+        <div class="logo-container">
+          <svg class="logo-icon" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h1 class="cover-title">LinkVault</h1>
+        <p class="cover-subtitle">个人链接收纳与备注的轻量化移动端应用</p>
+        
+        <div class="cover-meta">
+          <div class="cover-meta-item">汇报人: <strong>风启自航</strong></div>
+          <div class="cover-meta-item">开发模式: <strong>人机协同 / AI 辅助研发</strong></div>
+          <div class="cover-meta-item">项目阶段: <strong>MVP 验证闭环</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         Slide 2: 痛点与需求背景
+         ========================================== -->
+    <section class="slide" id="slide-2">
+      <div class="slide-content">
+        <h1 class="slide-title">为什么需要 <span>LinkVault</span>？</h1>
+        <p class="subtitle">解决我们在手机浏览信息时，“值得保存，但回头找不到”的核心痛点。</p>
+        
+        <div class="pain-vs-solution">
+          <div class="card pain-box">
+            <h2 class="card-title" style="color: #ef4444;">
+              <svg style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              日常信息收集的痛点
+            </h2>
+            <p class="card-text" style="margin-bottom: 1rem;">❌ <span class="highlight-text" style="color:#ef4444;">信息孤岛</span>：微信、B站、YouTube 各处收藏，缺乏统一归集入口。</p>
+            <p class="card-text" style="margin-bottom: 1rem;">❌ <span class="highlight-text" style="color:#ef4444;">信息堆积</span>：久而久之，收藏夹退化为无序的“吃灰垃圾堆”。</p>
+            <p class="card-text">❌ <span class="highlight-text" style="color:#ef4444;">上下文缺失</span>：回找时只记得“当时的想法/备注”，但平台无法保存。</p>
+          </div>
+          
+          <div class="vs-divider">VS</div>
+          
+          <div class="card solution-box">
+            <h2 class="card-title">
+              <svg style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2" viewBox="0 0 24 24">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              LinkVault 的解决方案
+            </h2>
+            <p class="card-text" style="margin-bottom: 1rem;">✅ <span class="highlight-text">一站式归集</span>：手机端快速复制，一键导入各种平台链接。</p>
+            <p class="card-text" style="margin-bottom: 1rem;">✅ <span class="highlight-text">上下文备注</span>：强制或引导用户保存时留下备注，锁住记忆线索。</p>
+            <p class="card-text">✅ <span class="highlight-text">多维组织</span>：依靠轻量化的“标签 + 备注搜索”随时找回内容。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         Slide 3: 完整的系统技术栈
+         ========================================== -->
+    <section class="slide" id="slide-3">
+      <div class="slide-content">
+        <h1 class="slide-title">LinkVault <span>系统技术栈</span></h1>
+        <p class="subtitle">前后端分离，依托工业级标准技术架构，提供高性能与多端适配的能力。</p>
+        
+        <div class="tech-grid">
+          <div class="tech-section">
+            <div class="tech-section-title">
+              <span>后端技术栈 (Spring Boot 3.5)</span>
+              <span style="color: var(--text-gray); font-size: 0.8rem;">Java 21</span>
+            </div>
+            <ul class="tech-list">
+              <li><strong>核心与构建</strong>：Spring Boot 3.5.x、Apache Maven <span>(企业开发基石)</span></li>
+              <li><strong>数据库层</strong>：MySQL 8.0 <span>(支持 utf8mb4 Emoji 兼容)</span> + MyBatis Plus 3.5.x</li>
+              <li><strong>安全与鉴权</strong>：JWT 无状态鉴权 <span>(结合 Spring Security Filter)</span></li>
+              <li><strong>数据强校验</strong>：Jakarta Validation <span>(在 DTO 层拦截不合规入参)</span></li>
+              <li><strong>异步并发</strong>：ThreadPoolTaskExecutor <span>(多线程并发抓取网页)</span></li>
+              <li><strong>服务集成</strong>：Java 11 HttpClient、YouTube API v3、Aliyun SMS SDK</li>
+            </ul>
+          </div>
+          
+          <div class="tech-section">
+            <div class="tech-section-title">
+              <span>前端技术栈 (uni-app)</span>
+              <span style="color: var(--text-gray); font-size: 0.8rem;">Vue 3 / Vite</span>
+            </div>
+            <ul class="tech-list">
+              <li><strong>前端框架</strong>：uni-app <span>(基于 Vue 3，支持编译 Android App / H5)</span></li>
+              <li><strong>构建工具</strong>：Vite <span>(极速热更新构建打包引擎)</span></li>
+              <li><strong>组件库</strong>：uview-plus <span>(深度定制的高质量移动端组件库)</span></li>
+              <li><strong>状态管理</strong>：Pinia <span>(轻量级全局状态管理，存储用户态)</span></li>
+              <li><strong>网络请求</strong>：基于 uni.request 封装 <span>(支持全局拦截、Token 续期)</span></li>
+              <li><strong>设计系统</strong>：暗岩与琥珀黑金主题配色 <span>(基于 8px 空间系统)</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         Slide 4: 研发流 (AI 辅助实践)
+         ========================================== -->
+    <section class="slide" id="slide-4">
+      <div class="slide-content">
+        <h1 class="slide-title">契约先行：<span>AI 辅助研发流程</span></h1>
+        <p class="subtitle">面对系统复杂性，我没有急着写代码。而是先定契约，用文档给 AI 提供精准的上下文，实现高效人机协同。</p>
+        
+        <div class="workflow-steps">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-title">需求与原型</div>
+            <div class="step-desc">明确 MVP 边界，输出需求基线文档。</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-title">表结构设计</div>
+            <div class="step-desc">物理设计数据库表、索引及关系。</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-title">OpenAPI 契约</div>
+            <div class="step-desc">制定统一 API 规范，编写 openapi.yaml。</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-title">编码约束</div>
+            <div class="step-desc">定制风格约定规范，由 AI 辅助进行编写。</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">5</div>
+            <div class="step-title">双向校对</div>
+            <div class="step-desc">在开发中持续让文档与代码对比校订。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         Slide 5: 项目亮点 (技术与功能亮点)
+         ========================================== -->
+    <section class="slide" id="slide-5">
+      <div class="slide-content">
+        <h1 class="slide-title">LinkVault <span>项目亮点</span></h1>
+        <p class="subtitle">区分技术亮点与功能亮点，兼顾工程规范性与用户实用价值。</p>
+        
+        <div class="highlights-container">
+          
+          <div class="highlight-group" style="border-left: 4px solid var(--color-amber-primary);">
+            <div class="highlight-group-title">
+              <svg style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2" viewBox="0 0 24 24">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                <polyline points="2 17 12 22 22 17"/>
+                <polyline points="2 12 12 17 22 12"/>
+              </svg>
+              技术亮点 (Technical)
+            </div>
+            
+            <div class="highlight-item">
+              <div class="highlight-item-title">1. API 契约驱动开发</div>
+              <div class="highlight-item-desc">基于 OpenAPI 标准制定接口描述，前后端零偏差并行开发与联调。</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-item-title">2. DTO/VO/Entity 严格分层与强校验</div>
+              <div class="highlight-item-desc">全链路数据隔离，利用 Jakarta Validation 注解拦截一切脏数据入库。</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-item-title">3. 高并发异步多源解析爬虫</div>
+              <div class="highlight-item-desc">导入一键即返，后台利用多线程、HttpClient 与 YouTube API 异步填充。</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-item-title">4. 前端 无状态组件 (Stateless) 物理隔离</div>
+              <div class="highlight-item-desc">`components` 仅接 props/抛 emits，不染指网络与状态，极大提升复用度。</div>
+            </div>
+          </div>
+          
+          <div class="highlight-group" style="border-left: 4px solid var(--color-amber-primary);">
+            <div class="highlight-group-title">
+              <svg style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2" viewBox="0 0 24 24">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              功能亮点 (Functional)
+            </div>
+            
+            <div class="highlight-item">
+              <div class="highlight-item-title">1. 一键式跨平台链接归集</div>
+              <div class="highlight-item-desc">支持 B站、YouTube、公众号等多源链接的一键式智能抓取归集。</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-item-title">2. 深度上下文备注 (1000字上限)</div>
+              <div class="highlight-item-desc">支持超长备注，给链接加上保存当下的记忆索引，防范堆积垃圾。</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-item-title">3. 灵活的多维标签分类</div>
+              <div class="highlight-item-desc">支持多对多关系；提供置顶标签、正常标签及“未打标签”快速分组。</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-item-title">4. 基于主观记忆线索的模糊检索</div>
+              <div class="highlight-item-desc">统一搜索能力，支持关键词匹配标题/备注，与标签列表叠作 AND 筛选。</div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         Slide 6: 业务演示闭环
+         ========================================== -->
+    <section class="slide" id="slide-6">
+      <div class="slide-content">
+        <h1 class="slide-title">答辩系统演示流程</h1>
+        <p class="subtitle">下面我将开始进行系统核心链路的演示，闭环步骤如下：</p>
+        
+        <div class="demo-flow">
+          <div class="card demo-card">
+            <div class="demo-icon-wrapper">
+              <svg class="demo-icon" viewBox="0 0 24 24">
+                <rect x="2" y="2" width="20" height="20" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <h3 class="step-title">1. 验证码快速登录</h3>
+            <p class="step-desc">验证手机号 Mock 开关下的 123456 一键快速登录，新用户自动注册。</p>
+          </div>
+          
+          <div class="card demo-card">
+            <div class="demo-icon-wrapper">
+              <svg class="demo-icon" viewBox="0 0 24 24">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+            </div>
+            <h3 class="step-title">2. 复制链接导入</h3>
+            <p class="step-desc">粘贴 B 站或 YouTube 链接。解析中不阻断保存，秒速进入承接页。</p>
+          </div>
+          
+          <div class="card demo-card">
+            <div class="demo-icon-wrapper">
+              <svg class="demo-icon" viewBox="0 0 24 24">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </div>
+            <h3 class="step-title">3. 整理备注与标签</h3>
+            <p class="step-desc">在承接页记下个性化备注，并批量打上“AI动态”等标签分类。</p>
+          </div>
+          
+          <div class="card demo-card">
+            <div class="demo-icon-wrapper">
+              <svg class="demo-icon" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+            <h3 class="step-title">4. 多维度检索找回</h3>
+            <p class="step-desc">通过首页统计、标签快速筛选、标题与备注关键词完成精准回找。</p>
+          </div>
+        </div>
+        
+        <p style="text-align: center; margin-top: 3rem; font-size: 1.2rem; color: var(--color-amber-primary); font-weight: 600;">
+          —— 谢谢各位老师，下面正式开始系统演示 ——
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 控制导航栏 -->
+  <footer class="controls-bar">
+    <button class="nav-btn" id="js-btn-prev" disabled>
+      <svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2" viewBox="0 0 24 24">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      上一页
+    </button>
+    
+    <div class="progress-dots" id="js-progress-dots"></div>
+    
+    <div class="slide-number" id="js-slide-number">Slide 1 of 6</div>
+    
+    <button class="nav-btn" id="js-btn-next">
+      下一页
+      <svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2" viewBox="0 0 24 24">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </button>
+  </footer>
+
+  <!-- 键盘提示 -->
+  <div class="keyboard-tip">
+    <span>按键盘</span>
+    <span class="key-badge">←</span> / <span class="key-badge">→</span>
+    <span>或</span>
+    <span class="key-badge">空格</span>
+    <span>切换幻灯片</span>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dotsContainer = document.getElementById('js-progress-dots');
+      const btnPrev = document.getElementById('js-btn-prev');
+      const btnNext = document.getElementById('js-btn-next');
+      const slideNumLabel = document.getElementById('js-slide-number');
+      let currentSlideIndex = 0;
+
+      // ==========================================
+      // 初始化粒子背景
+      // ==========================================
+      const initParticles = () => {
+        const container = document.getElementById('js-particles');
+        const particleCount = 15;
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = `${Math.random() * 100}vw`;
+          particle.style.width = `${Math.random() * 80 + 30}px`;
+          particle.style.height = particle.style.width;
+          particle.style.animationDelay = `${Math.random() * 20}s`;
+          particle.style.animationDuration = `${Math.random() * 15 + 15}s`;
+          container.appendChild(particle);
+        }
+      };
+      initParticles();
+
+      // ==========================================
+      // 初始化页码小圆点
+      // ==========================================
+      slides.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.className = `dot ${idx === 0 ? 'active' : ''}`;
+        dot.addEventListener('click', () => goToSlide(idx));
+        dotsContainer.appendChild(dot);
+      });
+
+      const dots = Array.from(dotsContainer.querySelectorAll('.dot'));
+
+      // ==========================================
+      // 切换 slide 逻辑
+      // ==========================================
+      const updateControls = () => {
+        btnPrev.disabled = currentSlideIndex === 0;
+        btnNext.innerHTML = currentSlideIndex === slides.length - 1 ? 
+          `开始演示 <svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>` : 
+          `下一页 <svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>`;
+        slideNumLabel.textContent = `Slide ${currentSlideIndex + 1} of ${slides.length}`;
+        
+        dots.forEach((dot, idx) => {
+          dot.className = `dot ${idx === currentSlideIndex ? 'active' : ''}`;
+        });
+      };
+
+      const goToSlide = (index) => {
+        if (index < 0 || index >= slides.length) return;
+        
+        slides[currentSlideIndex].classList.remove('active');
+        currentSlideIndex = index;
+        slides[currentSlideIndex].classList.add('active');
+        
+        updateControls();
+      };
+
+      const nextSlide = () => {
+        if (currentSlideIndex < slides.length - 1) {
+          goToSlide(currentSlideIndex + 1);
+        } else {
+          alert('汇报结束，即将进入功能系统演示！');
+        }
+      };
+
+      const prevSlide = () => {
+        if (currentSlideIndex > 0) {
+          goToSlide(currentSlideIndex - 1);
+        }
+      };
+
+      // ==========================================
+      // 事件绑定
+      // ==========================================
+      btnPrev.addEventListener('click', prevSlide);
+      btnNext.addEventListener('click', nextSlide);
+
+      // 键盘事件
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          prevSlide();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

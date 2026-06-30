@@ -3,16 +3,13 @@
 
 # Local notes and temporary materials
 /docs/prototype/页面截图/
-/docs/个人随便写写/
-/示例URL.md
-
-# Build outputs
-/backend/target/
-/backend/linkvault-server/target/
-/frontend/node_modules/
-/frontend/dist/
 
 # Deployment workspace
 /docker/
 
 后端示例项目/
+
+# Agent configuration and workflows
+/.agents/
+/.agent/
+/.github/

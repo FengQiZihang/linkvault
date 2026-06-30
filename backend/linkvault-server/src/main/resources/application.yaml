@@ -25,4 +25,14 @@ app:
     secret: "linkvault-dev-secret-key-linkvault-dev-secret-key"
     access-token-expires-in: 604800
   metadata:
-    youtube-api-key: "AIzaSyDMUXJTmtYbhujwKwkBN3qFEdCnijJV1xE"
+    youtube-api-key: ${YOUTUBE_API_KEY:}
+
+aliyun:
+  sms:
+    enabled: false
+    access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
+    access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
+    sign-name: "速通互联验证码"
+    template-code: "100001"
+    endpoint: "dypnsapi.aliyuncs.com"
+
